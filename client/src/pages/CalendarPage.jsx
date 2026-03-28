@@ -57,7 +57,6 @@ export default function CalendarPage() {
     } finally { setGenerating(false); }
   }
 
-  // Build calendar grid
   const year = current.getFullYear(), month = current.getMonth();
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -84,7 +83,7 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      {/* Month nav */}
+      {}
       <div className="card" style={{ padding: "20px 24px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
           <button className="btn btn-ghost btn-icon" onClick={() => setCurrent(new Date(year, month - 1))}><ChevronLeft size={18} /></button>
@@ -92,16 +91,16 @@ export default function CalendarPage() {
           <button className="btn btn-ghost btn-icon" onClick={() => setCurrent(new Date(year, month + 1))}><ChevronRight size={18} /></button>
         </div>
 
-        {/* Day headers */}
+        {}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2, marginBottom: 4 }}>
           {DAYS.map(d => <div key={d} style={{ textAlign: "center", fontSize: 11, fontWeight: 600, color: "var(--text2)", letterSpacing: "0.08em", padding: "6px 0" }}>{d}</div>)}
         </div>
 
-        {/* Calendar cells */}
+        {}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2 }}>
-          {/* Empty cells before month start */}
+          {}
           {Array.from({ length: firstDay }).map((_, i) => <div key={`e${i}`} style={{ minHeight: 72 }} />)}
-          {/* Days */}
+          {}
           {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(day => {
             const dayEvents = getEventsForDay(day);
             return (
@@ -127,7 +126,7 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      {/* Upcoming events list */}
+      {}
       <div style={{ marginTop: 22 }}>
         <h2 style={{ fontFamily: "var(--ff-display)", fontSize: 15, fontWeight: 700, marginBottom: 14 }}>This Month's Events</h2>
         {loading ? <div className="skeleton" style={{ height: 60, borderRadius: 10 }} /> :
@@ -147,7 +146,7 @@ export default function CalendarPage() {
         }
       </div>
 
-      {/* Add Event Modal */}
+      {}
       {modal && (
         <Modal title="Add Calendar Event" onClose={() => setModal(false)}>
           <div className="field"><label>Title *</label><input className="input" placeholder="e.g. Physics Study Session" value={form.title} onChange={e => setForm(p => ({...p, title: e.target.value}))} /></div>
@@ -166,7 +165,7 @@ export default function CalendarPage() {
         </Modal>
       )}
 
-      {/* AI Generate Modal */}
+      {}
       {aiModal && (
         <Modal title="AI Study Calendar Generator" onClose={() => setAiModal(false)}>
           <p style={{ color: "var(--text2)", fontSize: 13, lineHeight: 1.7, marginBottom: 20 }}>AI will analyse your pending tasks and create an optimised study schedule for the selected date range.</p>
@@ -184,3 +183,4 @@ export default function CalendarPage() {
     </div>
   );
 }
+
