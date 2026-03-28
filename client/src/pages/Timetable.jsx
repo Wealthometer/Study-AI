@@ -66,7 +66,6 @@ export default function Timetable() {
       setTimetable(data);
       setSelectedDay(0);
       setCompleted({});
-      // Refresh difficulty after generation
       const d = await api.get("/ai/difficulty");
       setDifficulty(d.data);
       setToast({ msg: `${genForm.days}-day timetable generated at ${data.difficulty_level} level! 🎯`, type: "success" });
@@ -97,7 +96,7 @@ export default function Timetable() {
 
   return (
     <div className="aFadeUp">
-      {/* ── Header ─────────────────────────────────────────────────── */}
+      {}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 28, flexWrap: "wrap", gap: 14 }}>
         <div>
           <div className="section-eyebrow">AI Planner</div>
@@ -119,10 +118,10 @@ export default function Timetable() {
         </div>
       </div>
 
-      {/* ── Top Stats Row ───────────────────────────────────────────── */}
+      {}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14, marginBottom: 24 }}>
 
-        {/* Difficulty Level Card */}
+        {}
         {loading ? <div className="skeleton" style={{ height: 90, borderRadius: 14 }} /> : difficulty ? (() => {
           const cfg = LEVEL_CONFIG[difficulty.level] || LEVEL_CONFIG.beginner;
           return (
@@ -157,7 +156,7 @@ export default function Timetable() {
           );
         })() : null}
 
-        {/* Score breakdown */}
+        {}
         {difficulty && (
           <div className="card-sm" style={{ padding: "18px 20px" }}>
             <div style={{ fontSize: 11, color: "var(--text2)", marginBottom: 12, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>Performance Breakdown</div>
@@ -179,7 +178,7 @@ export default function Timetable() {
           </div>
         )}
 
-        {/* Workload status */}
+        {}
         {workload && (
           <div className="card-sm" style={{ padding: "18px 20px", borderLeft: `3px solid ${wlColors[workload.status] || "var(--blue)"}` }}>
             <div style={{ fontSize: 11, color: "var(--text2)", marginBottom: 8, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>Workload</div>
@@ -202,7 +201,7 @@ export default function Timetable() {
           </div>
         )}
 
-        {/* Progress this timetable */}
+        {}
         {timetable && (
           <div className="card-sm" style={{ padding: "18px 20px" }}>
             <div style={{ fontSize: 11, color: "var(--text2)", marginBottom: 8, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>Today's Progress</div>
@@ -217,7 +216,7 @@ export default function Timetable() {
         )}
       </div>
 
-      {/* ── No timetable yet ────────────────────────────────────────── */}
+      {}
       {!timetable && !generating && (
         <div className="card" style={{ padding: "48px 32px" }}>
           <EmptyState
@@ -233,10 +232,10 @@ export default function Timetable() {
         </div>
       )}
 
-      {/* ── Timetable view ──────────────────────────────────────────── */}
+      {}
       {timetable && (
         <>
-          {/* AI Tips */}
+          {}
           {timetable.ai_tips?.length > 0 && (
             <div className="card" style={{ padding: "16px 20px", marginBottom: 18, background: "linear-gradient(135deg, var(--surface) 0%, rgba(155,116,240,0.06) 100%)", border: "1px solid rgba(155,116,240,0.15)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
@@ -254,7 +253,7 @@ export default function Timetable() {
             </div>
           )}
 
-          {/* Day selector tabs */}
+          {}
           <div style={{ display: "flex", gap: 6, marginBottom: 18, overflowX: "auto", paddingBottom: 4 }}>
             {days.map((day, i) => {
               const dayStudyMins = day.sessions?.filter(s => s.activity !== "Break").reduce((a, s) => a + (s.duration_minutes || 0), 0) || 0;
@@ -280,11 +279,11 @@ export default function Timetable() {
             })}
           </div>
 
-          {/* Day detail */}
+          {}
           {currentDay && (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 18, alignItems: "start" }}>
 
-              {/* Sessions timeline */}
+              {}
               <div className="card" style={{ padding: "22px 24px" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
                   <div>
@@ -301,7 +300,7 @@ export default function Timetable() {
                   <div style={{ textAlign: "center", color: "var(--text2)", fontSize: 13, padding: "32px 0" }}>🎉 No sessions — this is your rest day!</div>
                 ) : (
                   <div style={{ position: "relative" }}>
-                    {/* Timeline line */}
+                    {}
                     <div style={{ position: "absolute", left: 48, top: 0, bottom: 0, width: 1, background: "var(--border)" }} />
 
                     {currentDay.sessions.map((session, si) => {
@@ -313,14 +312,14 @@ export default function Timetable() {
 
                       return (
                         <div key={si} style={{ display: "flex", gap: 14, marginBottom: 12, position: "relative" }}>
-                          {/* Time */}
+                          {}
                           <div style={{ width: 40, textAlign: "right", flexShrink: 0, paddingTop: 14 }}>
                             <div style={{ fontSize: 10, color: "var(--text3)", lineHeight: 1.4 }}>
                               {session.start_time}<br />{session.end_time}
                             </div>
                           </div>
 
-                          {/* Dot */}
+                          {}
                           <div style={{ position: "relative", zIndex: 1, flexShrink: 0, paddingTop: 12 }}>
                             <div style={{
                               width: 14, height: 14, borderRadius: "50%",
@@ -331,7 +330,7 @@ export default function Timetable() {
                             }} />
                           </div>
 
-                          {/* Card */}
+                          {}
                           <div onClick={() => !isBreak && toggleSession(selectedDay, si)} style={{
                             flex: 1, padding: "12px 16px", borderRadius: 12,
                             background: done ? "rgba(74,232,160,0.06)" : isBreak ? "rgba(255,255,255,0.02)" : `${color}0d`,
@@ -379,10 +378,10 @@ export default function Timetable() {
                 )}
               </div>
 
-              {/* Right panel */}
+              {}
               <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
 
-                {/* Weekly Summary */}
+                {}
                 {timetable.weekly_summary && (
                   <div className="card" style={{ padding: "18px 20px", background: "linear-gradient(135deg, var(--surface) 0%, rgba(74,143,232,0.05) 100%)", border: "1px solid rgba(74,143,232,0.15)" }}>
                     <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--blue)", marginBottom: 8 }}>Weekly Plan</div>
@@ -390,7 +389,7 @@ export default function Timetable() {
                   </div>
                 )}
 
-                {/* All week subjects breakdown */}
+                {}
                 <div className="card" style={{ padding: "18px 20px" }}>
                   <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text2)", marginBottom: 14 }}>This Week's Subjects</div>
                   {(() => {
@@ -417,7 +416,7 @@ export default function Timetable() {
                   })()}
                 </div>
 
-                {/* Feedback */}
+                {}
                 <div className="card" style={{ padding: "18px 20px" }}>
                   <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text2)", marginBottom: 12 }}>Was this plan helpful?</div>
                   {feedback ? (
@@ -436,7 +435,7 @@ export default function Timetable() {
                   )}
                 </div>
 
-                {/* Difficulty suggestion */}
+                {}
                 {difficulty?.suggestion && (
                   <div className="card" style={{ padding: "18px 20px", background: "var(--gold-dim)", border: "1px solid rgba(232,200,74,0.2)" }}>
                     <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
@@ -459,3 +458,4 @@ export default function Timetable() {
     </div>
   );
 }
+
