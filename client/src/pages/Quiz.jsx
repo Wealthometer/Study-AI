@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Brain, Sparkles, CheckCircle, XCircle, Clock, Trophy } from "lucide-react";
+import { Brain, Sparkles, CheckCircle, XCircle, Clock, Trophy, Target, BookOpen, RefreshCw, Dumbbell, BarChart2 } from "lucide-react";
 import { Modal, Toast, EmptyState, Spinner } from "../components/UI";
 import api from "../lib/api";
 
@@ -74,7 +74,7 @@ export default function Quiz() {
       <div className="aFadeUp" style={{ maxWidth: 640, margin: "0 auto" }}>
         <div className="card" style={{ padding: "40px 36px", textAlign: "center", marginBottom: 24 }}>
           <div style={{ fontSize: 48, marginBottom: 12 }}>
-            {pct >= 90 ? "🏆" : pct >= 75 ? "🎯" : pct >= 60 ? "📚" : "💪"}
+            {(() => { const Icon = pct >= 90 ? Trophy : pct >= 75 ? Target : pct >= 60 ? BookOpen : Dumbbell; return <Icon size={42} />; })()}
           </div>
           <div style={{ fontFamily: "var(--ff-display)", fontSize: 28, fontWeight: 800, color: grade.color, marginBottom: 4 }}>{grade.label}</div>
           <div style={{ fontFamily: "var(--ff-display)", fontSize: 52, fontWeight: 800, marginBottom: 4 }}>{pct}%</div>
@@ -241,13 +241,13 @@ export default function Quiz() {
         {}
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {[
-            { icon: "🧠", title: "AI-Generated Questions", desc: "Questions are tailored to your uploaded material using GPT-4o Mini." },
-            { icon: "📊", title: "Instant Scoring", desc: "Get your score immediately with detailed explanations for each answer." },
-            { icon: "🎯", title: "Track Progress", desc: "Quiz scores are tracked and feed into your subject mastery analytics." },
-            { icon: "🔁", title: "Spaced Repetition", desc: "Retake quizzes on weak areas to reinforce long-term retention." },
+            { icon: Brain, title: "AI-Generated Questions", desc: "Questions are tailored to your uploaded material using GPT-4o Mini." },
+            { icon: BarChart2, title: "Instant Scoring", desc: "Get your score immediately with detailed explanations for each answer." },
+            { icon: Target, title: "Track Progress", desc: "Quiz scores are tracked and feed into your subject mastery analytics." },
+            { icon: RefreshCw, title: "Spaced Repetition", desc: "Retake quizzes on weak areas to reinforce long-term retention." },
           ].map((tip, i) => (
             <div key={i} className="card-sm" style={{ padding: "16px 18px" }}>
-              <div style={{ fontSize: 20, marginBottom: 8 }}>{tip.icon}</div>
+              <div style={{ fontSize: 20, marginBottom: 8 }}><tip.icon size={20} /></div>
               <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 4 }}>{tip.title}</div>
               <div style={{ fontSize: 12, color: "var(--text2)", lineHeight: 1.7 }}>{tip.desc}</div>
             </div>
@@ -260,4 +260,7 @@ export default function Quiz() {
     </div>
   );
 }
+
+
+
 
