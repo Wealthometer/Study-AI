@@ -307,7 +307,7 @@ export default function Tutor() {
         copy[copy.length - 1] = {
           role: "assistant",
           content:
-            "⚠️ Something went wrong. Please check that your `OPENROUTER_API_KEY` is set in `.env` and try again.",
+            "Something went wrong. Please check that your `OPENROUTER_API_KEY` is set in `.env` and try again.",
           time: new Date().toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
@@ -325,7 +325,7 @@ export default function Tutor() {
     setMessages([
       {
         role: "assistant",
-        content: "Chat cleared! What would you like to study? 📚",
+        content: "Chat cleared! What would you like to study?",
         time: new Date().toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
@@ -893,4 +893,7 @@ export default function Tutor() {
     </div>
   );
 }
+
+
+
 
