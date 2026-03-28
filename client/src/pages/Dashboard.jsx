@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BookOpen, CheckSquare, Zap, Brain, ArrowRight, TrendingUp, Calendar, Users, Sparkles, Clock, Target } from "lucide-react";
+import { BookOpen, CheckSquare, Zap, Brain, ArrowRight, TrendingUp, Calendar, Users, Sparkles, Clock, Target, Hand, AlertTriangle, Sprout, Flame, CheckCircle } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { StatCard, SkeletonCard, EmptyState } from "../components/UI";
 import api from "../lib/api";
@@ -64,7 +64,7 @@ export default function Dashboard() {
       <div style={{ marginBottom: 32 }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
           <div>
-            <p style={{ color: "var(--text2)", fontSize: 13, marginBottom: 4 }}>{greeting} 👋</p>
+            <p style={{ color: "var(--text2)", fontSize: 13, marginBottom: 4 }}>{greeting} <Hand size={14} />
             <h1 style={{ fontFamily: "var(--ff-display)", fontSize: 28, fontWeight: 800, letterSpacing: "-0.5px" }}>
               {firstName}, <em style={{ fontFamily: "var(--ff-serif)", fontStyle: "italic", color: "var(--gold)" }}>let's study.</em>
             </h1>
@@ -86,7 +86,7 @@ export default function Dashboard() {
         <div style={{ padding: "12px 18px", background: "var(--red-dim)", border: "1px solid rgba(232,74,111,0.2)", borderRadius: 12, marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
           <div>
             <span style={{ color: "var(--red)", fontWeight: 600, fontSize: 13 }}>⚠️ {overdue.length} overdue task{overdue.length > 1 ? "s" : ""} </span>
-            <span style={{ color: "var(--text2)", fontSize: 13 }}>— get back on track!</span>
+            <span style={{ color: "var(--text2)", fontSize: 13 }}>� get back on track!</span>
           </div>
           <button className="btn btn-sm" style={{ background: "var(--red)", color: "#fff" }} onClick={() => navigate("/tasks")}>
             View Tasks <ArrowRight size={12} />
@@ -114,7 +114,7 @@ export default function Dashboard() {
             </div>
             {loading ? <SkeletonCard lines={3} /> :
              subjects.length === 0 ? (
-               <EmptyState icon="📚" title="No subjects yet" desc="Add your university courses to get started." action={<button className="btn btn-primary btn-sm" onClick={() => navigate("/subjects")}>Add Subject</button>} />
+               <EmptyState icon={BookOpen} title="No subjects yet" desc="Add your university courses to get started." action={<button className="btn btn-primary btn-sm" onClick={() => navigate("/subjects")}>Add Subject</button>} />
              ) : (
                subjects.map((s, i) => {
                  const c = SUBJECT_COLORS[i % SUBJECT_COLORS.length];
@@ -152,7 +152,7 @@ export default function Dashboard() {
               <button className="btn btn-ghost btn-sm" onClick={() => navigate("/tasks")}>All <ArrowRight size={12} /></button>
             </div>
             {loading ? <SkeletonCard lines={2} /> :
-             pending.length === 0 ? <EmptyState icon="✅" title="All caught up!" desc="No pending tasks. Add new ones to keep track." /> :
+             pending.length === 0 ? <EmptyState icon={CheckCircle} title="All caught up!" desc="No pending tasks. Add new ones to keep track." /> :
              (prioritized.length > 0 ? prioritized : pending.slice(0, 5)).map(t => {
                const days = t.deadline ? Math.ceil((new Date(t.deadline) - new Date()) / 86400000) : (t.days_left ?? null);
                const isOverdue = days !== null && days < 0;
@@ -215,7 +215,7 @@ export default function Dashboard() {
               <div className="card" style={{ padding: "18px 20px", marginBottom: 14, borderLeft: `3px solid ${cfg.color}`, cursor: "pointer" }} onClick={() => navigate("/timetable")}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <span style={{ fontSize: 22 }}>{cfg.emoji}</span>
+                    <span style={{ fontSize: 22, display: "inline-flex", alignItems: "center", justifyContent: "center", color: cfg.color }}><cfg.icon size={20} /></span>
                     <div>
                       <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text2)", marginBottom: 2 }}>Your Level</div>
                       <div style={{ fontFamily: "var(--ff-display)", fontSize: 16, fontWeight: 800, color: cfg.color }}>{cfg.label}</div>
@@ -275,4 +275,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
 
