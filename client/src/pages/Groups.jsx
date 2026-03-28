@@ -74,7 +74,7 @@ export default function Groups() {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: selected ? "280px 1fr" : "1fr", gap: 20 }}>
-        {/* Group list */}
+        {}
         <div>
           {loading ? [1,2].map(i => <div key={i} className="skeleton" style={{ height: 80, borderRadius: 12, marginBottom: 10 }} />) :
            groups.length === 0 ? (
@@ -100,10 +100,10 @@ export default function Groups() {
           }
         </div>
 
-        {/* Group Details */}
+        {}
         {selected && details && (
           <div>
-            {/* Header */}
+            {}
             <div className="card" style={{ padding: "20px 24px", marginBottom: 16 }}>
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 12 }}>
                 <div>
@@ -115,7 +115,7 @@ export default function Groups() {
                   <div>Invite Code</div>
                 </div>
               </div>
-              {/* Members */}
+              {}
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 {details.members.map(m => (
                   <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 6, padding: "5px 10px", background: "var(--surface2)", borderRadius: 8 }}>
@@ -129,7 +129,7 @@ export default function Groups() {
               </div>
             </div>
 
-            {/* Discussion */}
+            {}
             <div className="card" style={{ padding: "20px 24px" }}>
               <h3 style={{ fontFamily: "var(--ff-display)", fontSize: 14, fontWeight: 700, marginBottom: 16, display: "flex", alignItems: "center", gap: 7 }}>
                 <MessageCircle size={14} /> Discussion
@@ -165,7 +165,7 @@ export default function Groups() {
         )}
       </div>
 
-      {/* Create Modal */}
+      {}
       {createModal && (
         <Modal title="Create Study Group" onClose={() => setCreateModal(false)}>
           <div className="field"><label>Group Name *</label><input className="input" placeholder="e.g. Physics Study Crew" value={cForm.name} onChange={e => setCForm(p => ({...p, name: e.target.value}))} /></div>
@@ -178,7 +178,7 @@ export default function Groups() {
         </Modal>
       )}
 
-      {/* Join Modal */}
+      {}
       {joinModal && (
         <Modal title="Join a Study Group" onClose={() => setJoinModal(false)}>
           <div className="field"><label>Invite Code</label><input className="input" placeholder="Enter 8-character invite code" value={joinCode} onChange={e => setJoinCode(e.target.value.toUpperCase())} maxLength={8} style={{ letterSpacing: "0.2em", textTransform: "uppercase", fontSize: 16 }} /></div>
@@ -194,3 +194,4 @@ export default function Groups() {
     </div>
   );
 }
+
