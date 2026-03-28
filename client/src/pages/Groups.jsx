@@ -78,7 +78,7 @@ export default function Groups() {
         <div>
           {loading ? [1,2].map(i => <div key={i} className="skeleton" style={{ height: 80, borderRadius: 12, marginBottom: 10 }} />) :
            groups.length === 0 ? (
-             <EmptyState icon="👥" title="No groups yet" desc="Create a study group or join one with an invite code." action={<button className="btn btn-primary btn-sm" onClick={() => setCreateModal(true)}>Create Group</button>} />
+             <EmptyState icon={Users} title="No groups yet" desc="Create a study group or join one with an invite code." action={<button className="btn btn-primary btn-sm" onClick={() => setCreateModal(true)}>Create Group</button>} />
            ) : (
              groups.map(g => (
                <button key={g.id} onClick={() => loadDetails(g.id)} style={{
@@ -194,4 +194,7 @@ export default function Groups() {
     </div>
   );
 }
+
+
+
 
