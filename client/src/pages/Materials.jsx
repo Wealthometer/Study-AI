@@ -76,7 +76,7 @@ export default function Materials() {
         </div>
       </div>
 
-      {/* Upload area */}
+      {}
       <div
         className="card" style={{ padding: "28px", marginBottom: 24, border: dragOver ? "2px dashed var(--gold)" : "2px dashed var(--border)", cursor: "pointer", textAlign: "center", transition: "all 0.2s", background: dragOver ? "var(--gold-dim)" : "" }}
         onDragOver={e => { e.preventDefault(); setDragOver(true); }}
@@ -90,7 +90,7 @@ export default function Materials() {
         <div style={{ fontSize: 12, color: "var(--text2)" }}>Supports PDF, Images, Audio, Video, PowerPoint, Text · Max 50MB</div>
       </div>
 
-      {/* Materials grid */}
+      {}
       {loading ? (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: 14 }}>
           {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 110, borderRadius: 14 }} />)}
@@ -131,7 +131,7 @@ export default function Materials() {
         </div>
       )}
 
-      {/* Upload Modal */}
+      {}
       {modal && (
         <Modal title="Upload Material" onClose={() => setModal(false)}>
           <div className="field"><label>Title (optional)</label><input className="input" placeholder="e.g. Lecture 5 - Thermodynamics" value={uploadForm.title} onChange={e => setUploadForm(p => ({...p, title: e.target.value}))} /></div>
@@ -148,7 +148,7 @@ export default function Materials() {
         </Modal>
       )}
 
-      {/* YouTube Modal */}
+      {}
       {ytModal && (
         <Modal title="Add YouTube Video" onClose={() => setYtModal(false)}>
           <div className="field"><label>Title</label><input className="input" placeholder="e.g. MIT OCW - Quantum Mechanics" value={ytForm.title} onChange={e => setYtForm(p => ({...p, title: e.target.value}))} /></div>
@@ -173,3 +173,4 @@ export default function Materials() {
     </div>
   );
 }
+
