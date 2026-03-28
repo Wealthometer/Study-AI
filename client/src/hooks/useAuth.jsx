@@ -14,7 +14,6 @@ export function AuthProvider({ children }) {
   const { signOut: clerkSignOut } = useClerk();
   const { isSignedIn } = useClerkAuth();
 
-  // Email/password login
   const login = useCallback(async (email, password) => {
     const { data } = await api.post("/auth/login", { email, password });
     localStorage.setItem("sf_token", data.token);
@@ -23,7 +22,6 @@ export function AuthProvider({ children }) {
     return data;
   }, []);
 
-  // Email/password registration
   const register = useCallback(async (payload) => {
     const { data } = await api.post("/auth/register", payload);
     localStorage.setItem("sf_token", data.token);
@@ -32,7 +30,6 @@ export function AuthProvider({ children }) {
     return data;
   }, []);
 
-  // Used by GoogleCallback page after OAuth redirect
   const setUserFromToken = useCallback((userData) => {
     setUser(userData);
   }, []);
@@ -41,7 +38,6 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("sf_token");
     localStorage.removeItem("sf_user");
     setUser(null);
-    // Also end the Clerk session so the user is fully signed out
     try { clerkSignOut?.(); } catch {}
   }, [clerkSignOut]);
 
@@ -53,13 +49,11 @@ export function AuthProvider({ children }) {
     } catch {}
   }, []);
 
-  // Kick off Google OAuth via Clerk
   const loginWithGoogle = useCallback(() => {
     if (!clerkLoaded || !signIn) {
       throw new Error("Auth is still loading. Please try again in a moment.");
     }
 
-    // Avoid re-auth when a Clerk session already exists
     if (isSignedIn) {
       window.location.href = "/auth/callback";
       return;
@@ -80,3 +74,4 @@ export function AuthProvider({ children }) {
 }
 
 export const useAuth = () => useContext(AuthCtx);
+
