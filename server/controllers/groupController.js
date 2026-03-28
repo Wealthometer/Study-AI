@@ -17,7 +17,6 @@ async function createGroup(req, res) {
             [name, description || null, subject || null, req.user.id, inviteCode, is_public || false, max_members || 10]
         );
 
-        // Add owner as member
         await db.execute(
             "INSERT INTO group_members (group_id, user_id, role) VALUES (?, ?, 'owner')",
             [result.insertId, req.user.id]
@@ -142,3 +141,4 @@ async function shareFlashcard(req, res) {
 }
 
 module.exports = { createGroup, joinGroup, getMyGroups, getGroupDetails, postDiscussion, shareFlashcard };
+
