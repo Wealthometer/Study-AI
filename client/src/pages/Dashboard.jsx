@@ -31,7 +31,6 @@ export default function Dashboard() {
         setProgress(pRes.data);
       } finally { setLoading(false); }
 
-      // Load AI data in background
       try {
         const [recData, diffData, prioData] = await Promise.allSettled([
           api.get("/ai/recommendations"),
@@ -61,7 +60,7 @@ export default function Dashboard() {
 
   return (
     <div className="aFadeUp">
-      {/* Header */}
+      {}
       <div style={{ marginBottom: 32 }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
           <div>
@@ -82,7 +81,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Overdue alert */}
+      {}
       {overdue.length > 0 && (
         <div style={{ padding: "12px 18px", background: "var(--red-dim)", border: "1px solid rgba(232,74,111,0.2)", borderRadius: 12, marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
           <div>
@@ -95,7 +94,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Stats */}
+      {}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, marginBottom: 28 }}>
         {loading ? Array(4).fill(0).map((_,i) => <div key={i} className="skeleton" style={{ height: 90, borderRadius: 12 }} />) : <>
           <StatCard value={subjects.length} label="Subjects" icon={BookOpen} color="var(--blue)" sub="Active courses" />
@@ -107,7 +106,7 @@ export default function Dashboard() {
 
       <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1.5fr) minmax(0,1fr)", gap: 22, alignItems: "start" }}>
         <div>
-          {/* Subject Progress */}
+          {}
           <div className="card" style={{ padding: "22px 24px", marginBottom: 18 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
               <h2 style={{ fontFamily: "var(--ff-display)", fontSize: 16, fontWeight: 700 }}>Subject Overview</h2>
@@ -143,7 +142,7 @@ export default function Dashboard() {
             }
           </div>
 
-          {/* Upcoming tasks - AI prioritized */}
+          {}
           <div className="card" style={{ padding: "22px 24px" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
               <div>
@@ -182,9 +181,9 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Right column */}
+        {}
         <div>
-          {/* AI Recommendations */}
+          {}
           <div className="card" style={{ padding: "22px 24px", marginBottom: 18, background: "linear-gradient(135deg, var(--surface) 0%, rgba(155,116,240,0.05) 100%)", border: "1px solid rgba(155,116,240,0.15)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
               <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--purple)", animation: "pulse 2s ease infinite" }} />
@@ -209,7 +208,7 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Difficulty level card */}
+          {}
           {difficulty && (() => {
             const cfg = { beginner: { color: "var(--blue)", emoji: "🌱", label: "Beginner" }, intermediate: { color: "var(--gold)", emoji: "⚡", label: "Intermediate" }, advanced: { color: "var(--green)", emoji: "🔥", label: "Advanced" } }[difficulty.level] || { color: "var(--blue)", emoji: "🌱", label: "Beginner" };
             return (
@@ -239,7 +238,7 @@ export default function Dashboard() {
             );
           })()}
 
-          {/* Quick actions */}
+          {}
           <div className="card" style={{ padding: "22px 24px" }}>
             <h2 style={{ fontFamily: "var(--ff-display)", fontSize: 14, fontWeight: 700, marginBottom: 14 }}>Quick Actions</h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -276,3 +275,4 @@ export default function Dashboard() {
     </div>
   );
 }
+
