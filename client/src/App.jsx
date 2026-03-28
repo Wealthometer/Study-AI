@@ -78,13 +78,13 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public routes */}
+        {}
         <Route path="/login"           element={<Login />} />
         <Route path="/register"        element={<Register />} />
-        {/* OAuth callback — must be accessible without auth */}
+        {}
         <Route path="/auth/callback"   element={<GoogleCallback />} />
 
-        {/* Protected app */}
+        {}
         <Route path="/*" element={
           <Protected>
             <AppLayout>
@@ -109,3 +109,4 @@ export default function App() {
     </BrowserRouter>
   );
 }
+
