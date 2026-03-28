@@ -56,12 +56,12 @@ export default function Flashcards() {
             <span style={{ fontSize: 13, color: "var(--text2)" }}>{studyIndex + 1} / {filtered.length}</span>
           </div>
 
-          {/* Progress */}
+          {}
           <div className="progress-bar" style={{ marginBottom: 28, height: 6 }}>
             <div className="progress-fill" style={{ width: `${(studyIndex / filtered.length) * 100}%`, background: "var(--gold)" }} />
           </div>
 
-          {/* Card */}
+          {}
           <div
             onClick={() => setFlipped(f => !f)}
             style={{
@@ -111,7 +111,7 @@ export default function Flashcards() {
         </div>
       </div>
 
-      {/* Filter chips */}
+      {}
       <div className="tabs" style={{ marginBottom: 20, gap: 6 }}>
         {["all","easy","medium","hard"].map(f => (
           <button key={f} className={`chip ${filter === f ? "active" : ""}`} onClick={() => setFilter(f)}>
@@ -146,7 +146,7 @@ export default function Flashcards() {
         </div>
       )}
 
-      {/* Generate Modal */}
+      {}
       {genModal && (
         <Modal title="Generate AI Flashcards" onClose={() => setGenModal(false)}>
           <div className="field">
@@ -188,3 +188,4 @@ export default function Flashcards() {
     </div>
   );
 }
+
