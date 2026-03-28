@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { CheckCircle, AlertCircle, X } from "lucide-react";
 
-// ── Toast ──────────────────────────────────────────────────────────────────────
 export function Toast({ msg, type = "success", onDone }) {
   useEffect(() => { const t = setTimeout(onDone, 3500); return () => clearTimeout(t); }, [onDone]);
   const colors = { success: "var(--green)", error: "var(--red)", info: "var(--blue)" };
@@ -15,7 +14,6 @@ export function Toast({ msg, type = "success", onDone }) {
   );
 }
 
-// ── Modal ──────────────────────────────────────────────────────────────────────
 export function Modal({ title, onClose, children, maxWidth = 520 }) {
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -36,7 +34,6 @@ export function Modal({ title, onClose, children, maxWidth = 520 }) {
   );
 }
 
-// ── Spinner ────────────────────────────────────────────────────────────────────
 export function Spinner({ size = 18, color = "var(--gold)" }) {
   return (
     <div style={{
@@ -49,7 +46,6 @@ export function Spinner({ size = 18, color = "var(--gold)" }) {
   );
 }
 
-// ── Skeleton Row ──────────────────────────────────────────────────────────────
 export function SkeletonCard({ lines = 3 }) {
   return (
     <div className="card-sm" style={{ padding: 18, marginBottom: 10 }}>
@@ -60,7 +56,6 @@ export function SkeletonCard({ lines = 3 }) {
   );
 }
 
-// ── Stat Card ─────────────────────────────────────────────────────────────────
 export function StatCard({ value, label, icon: Icon, color = "var(--gold)", sub }) {
   return (
     <div className="card-sm" style={{ padding: "20px 22px" }}>
@@ -76,7 +71,6 @@ export function StatCard({ value, label, icon: Icon, color = "var(--gold)", sub 
   );
 }
 
-// ── Empty State ───────────────────────────────────────────────────────────────
 export function EmptyState({ icon = "📭", title, desc, action }) {
   return (
     <div className="empty-state">
@@ -88,7 +82,6 @@ export function EmptyState({ icon = "📭", title, desc, action }) {
   );
 }
 
-// ── Confirm Dialog ────────────────────────────────────────────────────────────
 export function Confirm({ title, message, onConfirm, onCancel, danger = false }) {
   return (
     <Modal title={title} onClose={onCancel} maxWidth={420}>
@@ -101,7 +94,6 @@ export function Confirm({ title, message, onConfirm, onCancel, danger = false })
   );
 }
 
-// ── Progress Ring ─────────────────────────────────────────────────────────────
 export function ProgressRing({ pct, size = 72, sw = 5, color = "var(--gold)" }) {
   const r = (size - sw) / 2;
   const circ = 2 * Math.PI * r;
@@ -119,3 +111,4 @@ export function ProgressRing({ pct, size = 72, sw = 5, color = "var(--gold)" }) 
     </div>
   );
 }
+
