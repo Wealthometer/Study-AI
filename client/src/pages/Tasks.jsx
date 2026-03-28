@@ -1,4 +1,3 @@
-// ─── TASKS PAGE ───────────────────────────────────────────────────────────────
 import { useEffect, useState } from "react";
 import { Plus, Trash2, CheckCircle, Clock, Circle, Calendar, Filter } from "lucide-react";
 import { Modal, Toast, EmptyState, Spinner } from "../components/UI";
@@ -107,3 +106,4 @@ export function Tasks() {
   );
 }
 export default Tasks;
+
