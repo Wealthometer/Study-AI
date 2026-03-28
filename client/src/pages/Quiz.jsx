@@ -63,7 +63,6 @@ export default function Quiz() {
   const OPTS = ["A", "B", "C", "D"];
   const optKeys = { A: "option_a", B: "option_b", C: "option_c", D: "option_d" };
 
-  // ── Results Screen ────────────────────────────────────────────────────────
   if (phase === "results" && results) {
     const pct = results.score;
     const grade = pct >= 90 ? { label: "Excellent!", color: "var(--green)" } :
@@ -86,7 +85,7 @@ export default function Quiz() {
           </div>
         </div>
 
-        {/* Answer Review */}
+        {}
         <h2 style={{ fontFamily: "var(--ff-display)", fontSize: 16, fontWeight: 700, marginBottom: 14 }}>Answer Review</h2>
         {results.results.map((r, i) => {
           const origQ = questions.find(q => q.id === r.question_id);
@@ -110,7 +109,6 @@ export default function Quiz() {
     );
   }
 
-  // ── Quiz Screen ───────────────────────────────────────────────────────────
   if (phase === "quiz" && q) {
     const answered = Object.keys(answers).length;
     return (
@@ -122,12 +120,12 @@ export default function Quiz() {
           </div>
         </div>
 
-        {/* Progress */}
+        {}
         <div className="progress-bar" style={{ height: 6, marginBottom: 28 }}>
           <div className="progress-fill" style={{ width: `${(answered / questions.length) * 100}%`, background: "var(--gold)" }} />
         </div>
 
-        {/* Question nav dots */}
+        {}
         <div style={{ display: "flex", gap: 5, marginBottom: 24, flexWrap: "wrap" }}>
           {questions.map((_, i) => (
             <button key={i} onClick={() => setCurrent(i)} style={{
@@ -184,7 +182,6 @@ export default function Quiz() {
     );
   }
 
-  // ── Home Screen ───────────────────────────────────────────────────────────
   return (
     <div className="aFadeUp">
       <div style={{ marginBottom: 32 }}>
@@ -241,7 +238,7 @@ export default function Quiz() {
           </button>
         </div>
 
-        {/* Tips */}
+        {}
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {[
             { icon: "🧠", title: "AI-Generated Questions", desc: "Questions are tailored to your uploaded material using GPT-4o Mini." },
@@ -263,3 +260,4 @@ export default function Quiz() {
     </div>
   );
 }
+
