@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Calendar, Plus, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { CalendarRange, Plus, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import { Modal, Toast, Spinner, EmptyState } from "../components/UI";
 import api from "../lib/api";
 
@@ -130,7 +130,7 @@ export default function CalendarPage() {
       <div style={{ marginTop: 22 }}>
         <h2 style={{ fontFamily: "var(--ff-display)", fontSize: 15, fontWeight: 700, marginBottom: 14 }}>This Month's Events</h2>
         {loading ? <div className="skeleton" style={{ height: 60, borderRadius: 10 }} /> :
-         events.length === 0 ? <EmptyState icon="📅" title="No events this month" desc="Add study sessions or let AI generate a study schedule for you." /> :
+         events.length === 0 ? <EmptyState icon={CalendarRange} title="No events this month" desc="Add study sessions or let AI generate a study schedule for you." /> :
          events.slice(0, 8).map(ev => (
            <div key={ev.id} className="card-sm" style={{ padding: "12px 16px", marginBottom: 8, display: "flex", alignItems: "center", gap: 12 }}>
              <div style={{ width: 4, height: 36, borderRadius: 2, background: TYPE_COLORS[ev.event_type] || "var(--blue)", flexShrink: 0 }} />
