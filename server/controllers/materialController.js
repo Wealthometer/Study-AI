@@ -2,12 +2,10 @@ const { db } = require("../config/db");
 const path = require("path");
 const fs = require("fs");
 
-// Safely import optional heavy libraries
 let pdfParse, Tesseract;
 try { pdfParse = require("pdf-parse"); } catch(e) { console.warn("pdf-parse not installed"); }
 try { Tesseract = require("tesseract.js"); } catch(e) { console.warn("tesseract.js not installed"); }
 
-// Upload and process a material file
 async function uploadMaterial(req, res) {
     try {
         if (!req.file) {
@@ -20,7 +18,6 @@ async function uploadMaterial(req, res) {
         const fileSize = req.file.size;
         const detectedType = detectFileType(req.file.mimetype);
 
-        // Insert material record immediately
         const [result] = await db.execute(
             `INSERT INTO materials (user_id, subject_id, title, file_type, file_path, file_size, status)
              VALUES (?, ?, ?, ?, ?, ?, 'processing')`,
@@ -28,7 +25,6 @@ async function uploadMaterial(req, res) {
         );
         const materialId = result.insertId;
 
-        // Process asynchronously
         processFile(materialId, filePath, detectedType, req.file.mimetype);
 
         res.status(201).json({
@@ -56,7 +52,6 @@ async function processFile(materialId, filePath, fileType, mimetype) {
         } else if (fileType === "text") {
             extractedText = fs.readFileSync(filePath, "utf8");
         }
-        // Audio/Video: would use Whisper here in production
 
         await db.execute(
             "UPDATE materials SET extracted_text = ?, status = 'ready' WHERE id = ?",
@@ -69,7 +64,6 @@ async function processFile(materialId, filePath, fileType, mimetype) {
     }
 }
 
-// Add YouTube link
 async function addYoutubeLink(req, res) {
     try {
         const { title, youtube_url, subject_id } = req.body;
@@ -123,7 +117,6 @@ async function deleteMaterial(req, res) {
         );
         if (rows.length === 0) return res.status(404).json({ message: "Material not found" });
 
-        // Delete file from disk
         if (rows[0].file_path && fs.existsSync(rows[0].file_path)) {
             fs.unlinkSync(rows[0].file_path);
         }
@@ -145,3 +138,4 @@ function detectFileType(mimetype) {
 }
 
 module.exports = { uploadMaterial, addYoutubeLink, getMaterials, getMaterial, deleteMaterial };
+
