@@ -54,10 +54,10 @@ a { color: inherit; text-decoration: none; }
 button { font-family: var(--ff-body); cursor: pointer; border: none; background: none; }
 input, select, textarea { font-family: var(--ff-body); }
 
-/* ── Utility ── */
+
 .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
 
-/* ── Animations ── */
+
 @keyframes fadeUp   { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
 @keyframes fadeIn   { from { opacity:0; } to { opacity:1; } }
 @keyframes spin     { to { transform: rotate(360deg); } }
@@ -72,7 +72,7 @@ input, select, textarea { font-family: var(--ff-body); }
 .d1 { animation-delay:.08s; } .d2 { animation-delay:.16s; } .d3 { animation-delay:.24s; }
 .d4 { animation-delay:.32s; } .d5 { animation-delay:.4s; }
 
-/* ── Cards & Surfaces ── */
+
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -89,7 +89,7 @@ input, select, textarea { font-family: var(--ff-body); }
   border: 1px solid var(--border);
 }
 
-/* ── Buttons ── */
+
 .btn {
   display: inline-flex; align-items: center; gap: 7px;
   padding: 10px 20px;
@@ -116,7 +116,7 @@ input, select, textarea { font-family: var(--ff-body); }
 .btn-icon { padding: 8px; border-radius: 8px; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
 
-/* ── Form ── */
+
 .field { margin-bottom: 18px; }
 .field label {
   display: block; margin-bottom: 6px;
@@ -135,7 +135,7 @@ input, select, textarea { font-family: var(--ff-body); }
 .input-error { border-color: var(--red) !important; }
 .field-error { font-size: 11px; color: var(--red); margin-top: 5px; }
 
-/* ── Tags / Badges ── */
+
 .badge {
   display: inline-flex; align-items: center; gap: 4px;
   padding: 3px 9px; border-radius: 100px;
@@ -148,7 +148,7 @@ input, select, textarea { font-family: var(--ff-body); }
 .badge-purple { background: var(--purple-dim); color: var(--purple); }
 .badge-gray   { background: rgba(255,255,255,0.05); color: var(--text2); }
 
-/* ── Skeleton Loader ── */
+
 .skeleton {
   background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
   background-size: 200% 100%;
@@ -156,14 +156,14 @@ input, select, textarea { font-family: var(--ff-body); }
   border-radius: 6px;
 }
 
-/* ── Progress bar ── */
+
 .progress-bar { height: 4px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
 .progress-fill { height: 100%; border-radius: 2px; transition: width 0.8s cubic-bezier(.22,1,.36,1); }
 
-/* ── Divider ── */
+
 .divider { height: 1px; background: var(--border); margin: 20px 0; }
 
-/* ── Modal ── */
+
 .modal-bg {
   position: fixed; inset: 0; z-index: 600;
   background: rgba(0,0,0,0.7); backdrop-filter: blur(12px);
@@ -182,7 +182,7 @@ input, select, textarea { font-family: var(--ff-body); }
 }
 .modal-footer { display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end; }
 
-/* ── Toast ── */
+
 .toast {
   position: fixed; bottom: 24px; right: 24px; z-index: 900;
   background: var(--surface2); border: 1px solid var(--border2);
@@ -192,14 +192,14 @@ input, select, textarea { font-family: var(--ff-body); }
   box-shadow: 0 8px 32px rgba(0,0,0,0.4);
 }
 
-/* ── Empty State ── */
+
 .empty-state {
   text-align: center; padding: 48px 20px;
   color: var(--text2); font-size: 13px; line-height: 2;
 }
 .empty-icon { font-size: 32px; margin-bottom: 12px; opacity: 0.5; }
 
-/* ── Section Title ── */
+
 .section-eyebrow {
   display: inline-block; padding: 4px 12px;
   background: var(--gold-dim); border: 1px solid rgba(232,200,74,0.2);
@@ -213,7 +213,7 @@ input, select, textarea { font-family: var(--ff-body); }
 }
 .section-title em { font-family: var(--ff-serif); font-style: italic; color: var(--gold); }
 
-/* ── Spinner ── */
+
 .spinner {
   width: 18px; height: 18px; border-radius: 50%;
   border: 2px solid rgba(255,255,255,0.15);
@@ -222,7 +222,7 @@ input, select, textarea { font-family: var(--ff-body); }
   display: inline-block;
 }
 
-/* ── Chip Toggles ── */
+
 .chip {
   display: inline-flex; align-items: center; gap: 5px;
   padding: 6px 14px; border-radius: 100px;
@@ -233,13 +233,14 @@ input, select, textarea { font-family: var(--ff-body); }
 .chip:hover { border-color: var(--gold); color: var(--gold); }
 .chip.active { background: var(--gold-dim); border-color: rgba(232,200,74,0.3); color: var(--gold); }
 
-/* ── Scrollable tabs ── */
+
 .tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px; }
 .tabs::-webkit-scrollbar { display: none; }
 
-/* ── Responsive ── */
+
 @media (max-width: 768px) {
   .modal { padding: 20px; }
   .modal-title { font-size: 18px; }
   .toast { left: 16px; right: 16px; min-width: unset; }
 }
+
