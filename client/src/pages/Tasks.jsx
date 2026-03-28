@@ -62,7 +62,7 @@ export function Tasks() {
       </div>
 
       {loading ? <div className="skeleton" style={{ height: 80, borderRadius: 12 }} /> :
-       filtered.length === 0 ? <EmptyState icon="✅" title="No tasks here" desc="Add academic tasks to track your workload." action={<button className="btn btn-primary btn-sm" onClick={() => setModal(true)}>Add Task</button>} /> :
+       filtered.length === 0 ? <EmptyState icon={CheckCircle} title="No tasks here" desc="Add academic tasks to track your workload." action={<button className="btn btn-primary btn-sm" onClick={() => setModal(true)}>Add Task</button>} /> :
        filtered.map(t => {
          const days = t.deadline ? Math.ceil((new Date(t.deadline) - new Date()) / 86400000) : null;
          const overdue = days !== null && days < 0 && t.status !== "completed";
@@ -106,4 +106,6 @@ export function Tasks() {
   );
 }
 export default Tasks;
+
+
 
