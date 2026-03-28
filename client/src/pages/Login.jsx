@@ -6,7 +6,6 @@ import AuthShell from "./AuthShell";
 import { Spinner } from "../components/UI";
 import { useAuth } from "../hooks/useAuth";
 
-// ── Google SVG icon ───────────────────────────────────────────────────────────
 function GoogleIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 48 48" style={{ flexShrink: 0 }}>
@@ -33,7 +32,6 @@ export default function Login() {
 
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
-  // Show error from OAuth redirect (e.g. ?error=google_failed)
   useEffect(() => {
     const oauthError = searchParams.get("error");
     if (oauthError === "google_failed") {
@@ -43,7 +41,6 @@ export default function Login() {
     }
   }, [searchParams]);
 
-  // If Clerk already has a session, jump straight to callback to sync app token
   useEffect(() => {
     if (clerkAuth.isSignedIn) {
       navigate("/auth/callback", { replace: true });
@@ -66,7 +63,6 @@ export default function Login() {
     try {
       loginWithGoogle(); // Navigates away — no need to setGLoading(false) if it succeeds
     } catch (err) {
-      // If Clerk says we're already signed in, just continue to the callback
       if (err?.message?.includes("already signed in")) {
         navigate("/auth/callback", { replace: true });
       } else {
@@ -84,7 +80,7 @@ export default function Login() {
       alternateLink="/register"
       alternateLabel="Create account"
     >
-      {/* Error banner */}
+      {}
       {error && (
         <div style={{
           padding: "11px 14px", background: "var(--red-dim)",
@@ -95,7 +91,7 @@ export default function Login() {
         </div>
       )}
 
-      {/* ── Google Sign-In button ── */}
+      {}
       <button
         type="button"
         onClick={handleGoogle}
@@ -122,7 +118,7 @@ export default function Login() {
         {gLoading ? "Redirecting to Google..." : "Continue with Google"}
       </button>
 
-      {/* ── Divider ── */}
+      {}
       <div style={{
         display: "flex", alignItems: "center", gap: 12,
         margin: "18px 0", color: "var(--text3)", fontSize: 12,
@@ -132,7 +128,7 @@ export default function Login() {
         <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
       </div>
 
-      {/* ── Email / password form ── */}
+      {}
       <form onSubmit={handleSubmit} autoComplete="on">
         <div className="field">
           <label>Email address</label>
@@ -168,3 +164,4 @@ export default function Login() {
     </AuthShell>
   );
 }
+
