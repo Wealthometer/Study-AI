@@ -68,7 +68,7 @@ export default function Analytics() {
         </div>
       ) : (
         <>
-          {/* Subject mastery rings */}
+          {}
           {subjectData.length > 0 && (
             <div className="card" style={{ padding: "24px 28px", marginBottom: 22 }}>
               <h2 style={{ fontFamily: "var(--ff-display)", fontSize: 15, fontWeight: 700, marginBottom: 22 }}>Subject Mastery</h2>
@@ -85,7 +85,7 @@ export default function Analytics() {
           )}
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginBottom: 22 }}>
-            {/* Weekly Study Hours */}
+            {}
             <div className="card" style={{ padding: "24px 28px" }}>
               <h2 style={{ fontFamily: "var(--ff-display)", fontSize: 15, fontWeight: 700, marginBottom: 18, display: "flex", alignItems: "center", gap: 8 }}>
                 <TrendingUp size={15} color="var(--gold)" /> Weekly Study Hours
@@ -105,7 +105,7 @@ export default function Analytics() {
               )}
             </div>
 
-            {/* Quiz Score Trend */}
+            {}
             <div className="card" style={{ padding: "24px 28px" }}>
               <h2 style={{ fontFamily: "var(--ff-display)", fontSize: 15, fontWeight: 700, marginBottom: 18, display: "flex", alignItems: "center", gap: 8 }}>
                 <Target size={15} color="var(--blue)" /> Quiz Score Trend
@@ -126,7 +126,7 @@ export default function Analytics() {
             </div>
           </div>
 
-          {/* Subject mastery bar chart */}
+          {}
           {subjectData.length > 0 && (
             <div className="card" style={{ padding: "24px 28px", marginBottom: 22 }}>
               <h2 style={{ fontFamily: "var(--ff-display)", fontSize: 15, fontWeight: 700, marginBottom: 18, display: "flex", alignItems: "center", gap: 8 }}>
@@ -145,7 +145,7 @@ export default function Analytics() {
             </div>
           )}
 
-          {/* Flashcard stats */}
+          {}
           {progress?.flashcard_stats && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 14, marginBottom: 22 }}>
               {[
@@ -161,7 +161,7 @@ export default function Analytics() {
             </div>
           )}
 
-          {/* AI Exam Prediction */}
+          {}
           <div className="card" style={{ padding: "24px 28px", background: "linear-gradient(135deg, var(--surface) 0%, rgba(155,116,240,0.06) 100%)", border: "1px solid rgba(155,116,240,0.15)" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 14, marginBottom: 20 }}>
               <h2 style={{ fontFamily: "var(--ff-display)", fontSize: 15, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
@@ -220,3 +220,4 @@ export default function Analytics() {
     </div>
   );
 }
+
