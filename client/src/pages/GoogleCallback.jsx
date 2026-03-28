@@ -20,7 +20,6 @@ export default function GoogleCallback() {
     if (!isLoaded) return;
 
     async function finishAuth() {
-      // If Clerk hasn't finished signing in yet
       if (!isSignedIn) {
         setStatus("Finishing sign-in with Clerk...");
         return;
@@ -45,7 +44,6 @@ export default function GoogleCallback() {
           }
         );
 
-        // Store your app auth
         localStorage.setItem("sf_token", data.token);
         localStorage.setItem("sf_user", JSON.stringify(data.user));
 
@@ -82,10 +80,10 @@ export default function GoogleCallback() {
         gap: 20,
       }}
     >
-      {/* REQUIRED: handles Clerk OAuth redirect */}
+      {}
       <AuthenticateWithRedirectCallback />
 
-      {/* Logo */}
+      {}
       <div
         style={{
           width: 56,
@@ -100,7 +98,7 @@ export default function GoogleCallback() {
         <GraduationCap size={26} color="#07090f" />
       </div>
 
-      {/* Spinner */}
+      {}
       <div
         style={{
           width: 36,
@@ -112,7 +110,7 @@ export default function GoogleCallback() {
         }}
       />
 
-      {/* Status text */}
+      {}
       <div
         style={{
           fontFamily: "var(--ff-display)",
