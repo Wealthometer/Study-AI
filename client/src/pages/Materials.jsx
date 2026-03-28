@@ -96,7 +96,7 @@ export default function Materials() {
           {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 110, borderRadius: 14 }} />)}
         </div>
       ) : materials.length === 0 ? (
-        <EmptyState icon="📄" title="No materials yet" desc="Upload your PDFs, lecture notes, and study materials to generate flashcards and quizzes with AI." action={<button className="btn btn-primary btn-sm" onClick={() => setModal(true)}>Upload First Material</button>} />
+        <EmptyState icon={FileText} title="No materials yet" desc="Upload your PDFs, lecture notes, and study materials to generate flashcards and quizzes with AI." action={<button className="btn btn-primary btn-sm" onClick={() => setModal(true)}>Upload First Material</button>} />
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: 14 }}>
           {materials.map(m => {
@@ -173,4 +173,6 @@ export default function Materials() {
     </div>
   );
 }
+
+
 
