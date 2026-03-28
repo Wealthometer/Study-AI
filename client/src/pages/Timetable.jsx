@@ -1,9 +1,6 @@
-import { useState, useEffect } from "react";
-import {
-  Clock, Sparkles, ChevronLeft, ChevronRight, RefreshCw,
+import { Clock, Sparkles, ChevronLeft, ChevronRight, RefreshCw,
   CheckCircle, BookOpen, Brain, Zap, Coffee, Star,
-  TrendingUp, AlertTriangle, ThumbsUp, ThumbsDown, Target
-} from "lucide-react";
+  TrendingUp, AlertTriangle, ThumbsUp, ThumbsDown, Target, Sprout, Flame, CalendarDays, Lightbulb, PartyPopper } from "lucide-react";
 import { Toast, Spinner, EmptyState } from "../components/UI";
 import api from "../lib/api";
 
@@ -28,9 +25,9 @@ const DIFF_COLORS = {
 };
 
 const LEVEL_CONFIG = {
-  beginner:     { label: "Beginner",     color: "var(--blue)",   emoji: "🌱", desc: "Building foundations" },
-  intermediate: { label: "Intermediate", color: "var(--gold)",   emoji: "⚡", desc: "Growing stronger" },
-  advanced:     { label: "Advanced",     color: "var(--green)",  emoji: "🔥", desc: "Performing at peak" },
+  beginner:     { label: "Beginner",     color: "var(--blue)",   icon: Sprout, desc: "Building foundations" },
+  intermediate: { label: "Intermediate", color: "var(--gold)",   icon: Zap,    desc: "Growing stronger" },
+  advanced:     { label: "Advanced",     color: "var(--green)",  icon: Flame,  desc: "Performing at peak" },
 };
 
 export default function Timetable() {
@@ -68,7 +65,7 @@ export default function Timetable() {
       setCompleted({});
       const d = await api.get("/ai/difficulty");
       setDifficulty(d.data);
-      setToast({ msg: `${genForm.days}-day timetable generated at ${data.difficulty_level} level! 🎯`, type: "success" });
+      setToast({ msg: `${genForm.days}-day timetable generated at ${data.difficulty_level} level! `, type: "success" });
     } catch (err) {
       setToast({ msg: err.response?.data?.message || "Generation failed. Add some tasks first!", type: "error" });
     } finally { setGenerating(false); }
@@ -78,7 +75,7 @@ export default function Timetable() {
     setFeedback(rating);
     try {
       await api.post("/ai/feedback", { rating, plan_type: "timetable" });
-      setToast({ msg: rating === "helpful" ? "Thanks! Glad it helped 🙌" : "Noted! We'll improve it 📝", type: "success" });
+      setToast({ msg: rating === "helpful" ? "Thanks! Glad it helped " : "Noted! We'll improve it ", type: "success" });
     } catch {}
   }
 
@@ -192,7 +189,7 @@ export default function Timetable() {
                 {workload.status === "balanced" ? "Balanced" : workload.status === "warning" ? "Heavy Load" : "Overloaded"}
               </span>
             </div>
-            <div style={{ fontSize: 11, color: "var(--text2)", lineHeight: 1.6 }}>{workload.recommendation?.slice(0, 100)}…</div>
+            <div style={{ fontSize: 11, color: "var(--text2)", lineHeight: 1.6 }}>{workload.recommendation?.slice(0, 100)}</div>
             {workload.total_estimated_hours > 0 && (
               <div style={{ marginTop: 8, fontSize: 11, color: "var(--text2)" }}>
                 <Clock size={10} style={{ marginRight: 4 }} />{workload.total_estimated_hours}h total remaining
@@ -220,7 +217,7 @@ export default function Timetable() {
       {!timetable && !generating && (
         <div className="card" style={{ padding: "48px 32px" }}>
           <EmptyState
-            icon="📅"
+            icon={CalendarDays}
             title="No timetable generated yet"
             desc="Click Generate to create your personalised AI study timetable. Make sure you have tasks added first!"
             action={
@@ -246,7 +243,9 @@ export default function Timetable() {
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 {timetable.ai_tips.map((tip, i) => (
                   <div key={i} style={{ padding: "8px 14px", background: "rgba(155,116,240,0.08)", border: "1px solid rgba(155,116,240,0.12)", borderRadius: 10, fontSize: 12, color: "var(--text)", lineHeight: 1.6, flex: "1 1 200px" }}>
-                    💡 {tip}
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                      <Lightbulb size={13} /> {tip}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -288,7 +287,7 @@ export default function Timetable() {
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
                   <div>
                     <h2 style={{ fontFamily: "var(--ff-display)", fontSize: 17, fontWeight: 800 }}>{currentDay.day_name}</h2>
-                    <div style={{ fontSize: 12, color: "var(--text2)", marginTop: 2 }}>{currentDay.date} · {Math.round((currentDay.total_study_minutes || 0) / 60 * 10) / 10}h study time</div>
+                    <div style={{ fontSize: 12, color: "var(--text2)", marginTop: 2 }}>{currentDay.date}  {Math.round((currentDay.total_study_minutes || 0) / 60 * 10) / 10}h study time</div>
                   </div>
                   <div style={{ display: "flex", gap: 6 }}>
                     <button className="btn btn-ghost btn-icon" onClick={() => setSelectedDay(i => Math.max(0, i - 1))} disabled={selectedDay === 0}><ChevronLeft size={16} /></button>
@@ -297,7 +296,9 @@ export default function Timetable() {
                 </div>
 
                 {(!currentDay.sessions || currentDay.sessions.length === 0) ? (
-                  <div style={{ textAlign: "center", color: "var(--text2)", fontSize: 13, padding: "32px 0" }}>🎉 No sessions — this is your rest day!</div>
+                  <div style={{ textAlign: "center", color: "var(--text2)", fontSize: 13, padding: "32px 0", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <PartyPopper size={16} /> No sessions — this is your rest day!
+                  </div>
                 ) : (
                   <div style={{ position: "relative" }}>
                     {}
@@ -362,7 +363,9 @@ export default function Timetable() {
                             </div>
                             {session.notes && !isBreak && (
                               <div style={{ marginTop: 8, fontSize: 11, color: "var(--text2)", borderTop: "1px solid var(--border)", paddingTop: 7, lineHeight: 1.6 }}>
-                                💡 {session.notes}
+                                <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                                  <Lightbulb size={13} /> {session.notes}
+                                </span>
                               </div>
                             )}
                             {done && (
@@ -421,7 +424,7 @@ export default function Timetable() {
                   <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text2)", marginBottom: 12 }}>Was this plan helpful?</div>
                   {feedback ? (
                     <div style={{ textAlign: "center", fontSize: 13, color: "var(--text2)" }}>
-                      {feedback === "helpful" ? "🙌 Thanks for the feedback!" : "📝 We'll improve it!"}
+                      {feedback === "helpful" ? " Thanks for the feedback!" : " We'll improve it!"}
                     </div>
                   ) : (
                     <div style={{ display: "flex", gap: 10 }}>
@@ -458,4 +461,13 @@ export default function Timetable() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
 
