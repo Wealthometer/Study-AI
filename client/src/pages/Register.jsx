@@ -6,7 +6,6 @@ import AuthShell from "./AuthShell";
 import { Spinner } from "../components/UI";
 import { useAuth } from "../hooks/useAuth";
 
-// ── Google SVG icon (same as Login) ──────────────────────────────────────────
 function GoogleIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 48 48" style={{ flexShrink: 0 }}>
@@ -74,7 +73,7 @@ export default function Register() {
         </div>
       )}
 
-      {/* ── Google Sign-Up button ── */}
+      {}
       <button type="button" onClick={handleGoogle} disabled={gLoading || loading}
         style={{
           display: "flex", alignItems: "center", justifyContent: "center",
@@ -90,14 +89,14 @@ export default function Register() {
         {gLoading ? "Redirecting to Google..." : "Sign up with Google"}
       </button>
 
-      {/* ── Divider ── */}
+      {}
       <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "18px 0", color: "var(--text3)", fontSize: 12 }}>
         <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
         OR REGISTER WITH EMAIL
         <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
       </div>
 
-      {/* ── Registration form ── */}
+      {}
       <form onSubmit={handleSubmit} autoComplete="on">
         <div className="field">
           <label>Full name</label>
@@ -174,3 +173,4 @@ export default function Register() {
     </AuthShell>
   );
 }
+
