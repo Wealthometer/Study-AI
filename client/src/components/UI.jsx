@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CheckCircle, AlertCircle, X } from "lucide-react";
+import { CheckCircle, AlertCircle, X, Inbox } from "lucide-react";
 
 export function Toast({ msg, type = "success", onDone }) {
   useEffect(() => { const t = setTimeout(onDone, 3500); return () => clearTimeout(t); }, [onDone]);
@@ -71,10 +71,10 @@ export function StatCard({ value, label, icon: Icon, color = "var(--gold)", sub 
   );
 }
 
-export function EmptyState({ icon = "📭", title, desc, action }) {
+export function EmptyState({ icon: Icon = Inbox, title, desc, action }) {
   return (
     <div className="empty-state">
-      <div className="empty-icon">{icon}</div>
+      <div className="empty-icon">{Icon ? <Icon size={26} /> : null}</div>
       <div style={{ fontFamily: "var(--ff-display)", fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 6 }}>{title}</div>
       <div style={{ maxWidth: 320, margin: "0 auto 16px", lineHeight: 1.7 }}>{desc}</div>
       {action}
@@ -111,4 +111,5 @@ export function ProgressRing({ pct, size = 72, sw = 5, color = "var(--gold)" }) 
     </div>
   );
 }
+
 
