@@ -60,7 +60,7 @@ export default function Subjects() {
           {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 110, borderRadius: 16 }} />)}
         </div>
       ) : subjects.length === 0 ? (
-        <EmptyState icon="📚" title="No subjects added" desc="Add your university courses to organise tasks, materials and track progress per subject." action={<button className="btn btn-primary btn-sm" onClick={() => setModal(true)}>Add First Subject</button>} />
+        <EmptyState icon={BookOpen} title="No subjects added" desc="Add your university courses to organise tasks, materials and track progress per subject." action={<button className="btn btn-primary btn-sm" onClick={() => setModal(true)}>Add First Subject</button>} />
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 14 }}>
           {subjects.map(s => (
@@ -117,3 +117,5 @@ export default function Subjects() {
     </div>
   );
 }
+
+
