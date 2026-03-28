@@ -41,7 +41,7 @@ export default function Flashcards() {
     try { await api.post(`/ai/flashcards/${id}/review`, { correct }); }
     catch {}
     if (studyIndex < filtered.length - 1) { setStudyIndex(i => i + 1); setFlipped(false); }
-    else { setStudyMode(false); setStudyIndex(0); setFlipped(false); setToast({ msg: "Study session complete! 🎉", type: "success" }); }
+    else { setStudyMode(false); setStudyIndex(0); setFlipped(false); setToast({ msg: "Study session complete!", type: "success" }); }
   }
 
   const filtered = flashcards.filter(f => filter === "all" || f.difficulty === filter);
@@ -125,7 +125,7 @@ export default function Flashcards() {
           {[1,2,3,4].map(i => <div key={i} className="skeleton" style={{ height: 140, borderRadius: 14 }} />)}
         </div>
       ) : filtered.length === 0 ? (
-        <EmptyState icon="⚡" title="No flashcards yet" desc="Upload a study material and generate AI flashcards in seconds." action={<button className="btn btn-primary btn-sm" onClick={() => setGenModal(true)}>Generate Flashcards</button>} />
+        <EmptyState icon={Zap} title="No flashcards yet" desc="Upload a study material and generate AI flashcards in seconds." action={<button className="btn btn-primary btn-sm" onClick={() => setGenModal(true)}>Generate Flashcards</button>} />
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: 14 }}>
           {filtered.map((card, i) => (
@@ -188,4 +188,8 @@ export default function Flashcards() {
     </div>
   );
 }
+
+
+
+
 
