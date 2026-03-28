@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { BarChart2, Target, Sparkles, TrendingUp } from "lucide-react";
+import { BarChart2, Target, Sparkles, TrendingUp, Lightbulb } from "lucide-react";
 import { ProgressRing, Spinner, Toast } from "../components/UI";
 import api from "../lib/api";
 
@@ -188,7 +188,7 @@ export default function Analytics() {
               <>
                 {prediction.study_advice && (
                   <div style={{ padding: "12px 16px", background: "rgba(155,116,240,0.1)", border: "1px solid rgba(155,116,240,0.15)", borderRadius: 10, marginBottom: 18, fontSize: 13, lineHeight: 1.7, color: "var(--text)" }}>
-                    💡 {prediction.study_advice}
+                    <Lightbulb size={14} style={{ marginRight: 6 }} /> {prediction.study_advice}
                   </div>
                 )}
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: 12 }}>
@@ -220,4 +220,5 @@ export default function Analytics() {
     </div>
   );
 }
+
 
