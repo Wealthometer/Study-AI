@@ -3,7 +3,6 @@ const { db } = require("../config/db");
 const { generateToken } = require("../config/jwt");
 const { verifyClerkSessionToken, clerkClient } = require("../config/clerk");
 
-// ── REGISTER (email + password) ────────────────────────────────────────────────
 async function register(req, res) {
   try {
     const { name, email, password, university, year_of_study, daily_study_hours, study_preference } = req.body;
@@ -44,7 +43,6 @@ async function register(req, res) {
   }
 }
 
-// ── LOGIN (email + password) ───────────────────────────────────────────────────
 async function login(req, res) {
   try {
     const { email, password } = req.body;
@@ -59,7 +57,6 @@ async function login(req, res) {
 
     const user = users[0];
 
-    // OAuth-only users have empty password — can't use password login
     if (!user.password) {
       return res.status(401).json({
         message: "This account was created via social login. Please use the Google/Clerk button to log in.",
@@ -80,7 +77,6 @@ async function login(req, res) {
   }
 }
 
-// ── CLERK SESSION → APP JWT EXCHANGE (handles Google via Clerk) ────────────────
 async function clerkExchange(req, res) {
   try {
     const header = req.headers.authorization;
@@ -98,7 +94,6 @@ async function clerkExchange(req, res) {
     const name      = nameParts.join(" ").trim() || clerkUser.username || "Clerk User";
     const avatar    = clerkUser.imageUrl || null;
 
-    // Find or create local profile mapped to Clerk
     const [existing] = await db.execute(
       "SELECT * FROM users WHERE clerk_id = ? OR email = ?",
       [clerkUserId, email]
@@ -135,7 +130,6 @@ async function clerkExchange(req, res) {
   }
 }
 
-// ── GET PROFILE ────────────────────────────────────────────────────────────────
 async function getProfile(req, res) {
   try {
     const [users] = await db.execute(
@@ -152,7 +146,6 @@ async function getProfile(req, res) {
   }
 }
 
-// ── UPDATE PROFILE ─────────────────────────────────────────────────────────────
 async function updateProfile(req, res) {
   try {
     const { name, university, year_of_study, daily_study_hours, study_preference } = req.body;
@@ -176,7 +169,6 @@ async function updateProfile(req, res) {
   }
 }
 
-// ── CHANGE PASSWORD ────────────────────────────────────────────────────────────
 async function changePassword(req, res) {
   try {
     const { current_password, new_password } = req.body;
@@ -204,3 +196,4 @@ async function changePassword(req, res) {
 }
 
 module.exports = { register, login, clerkExchange, getProfile, updateProfile, changePassword };
+
