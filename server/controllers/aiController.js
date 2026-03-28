@@ -1,7 +1,6 @@
 const { db } = require("../config/db");
 const crypto = require("crypto");
 
-// ─── OpenRouter AI Client ─────────────────────────────────────────────────────
 async function callAI(systemPrompt, userPrompt, jsonMode = false) {
     const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
     if (!apiKey) throw new Error("No AI API key configured. Add OPENROUTER_API_KEY to .env");
@@ -37,7 +36,6 @@ async function callAI(systemPrompt, userPrompt, jsonMode = false) {
     return data.choices[0].message.content;
 }
 
-// ─── Streaming AI helper (for tutor) ─────────────────────────────────────────
 async function callAIStream(messages, onChunk) {
     const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
     if (!apiKey) throw new Error("No AI API key configured.");
@@ -83,7 +81,6 @@ async function callAIStream(messages, onChunk) {
     return full;
 }
 
-// ─── Get material text for AI ─────────────────────────────────────────────────
 async function getMaterialText(materialId, userId) {
     const [rows] = await db.execute(
         "SELECT extracted_text, title, file_type, youtube_url FROM materials WHERE id = ? AND user_id = ?",
@@ -97,7 +94,6 @@ async function getMaterialText(materialId, userId) {
     return rows[0];
 }
 
-// ─── Generate Flashcards ──────────────────────────────────────────────────────
 async function generateFlashcards(req, res) {
     try {
         const { material_id, subject_id, count = 10, topic } = req.body;
@@ -125,7 +121,6 @@ ${textSnippet}`;
         const parsed = JSON.parse(raw);
         const cards = parsed.flashcards || [];
 
-        // Save to DB
         const saved = [];
         for (const card of cards) {
             const [result] = await db.execute(
@@ -147,7 +142,6 @@ ${textSnippet}`;
     }
 }
 
-// ─── Get Flashcards ───────────────────────────────────────────────────────────
 async function getFlashcards(req, res) {
     try {
         const { subject_id, material_id } = req.query;
@@ -165,13 +159,11 @@ async function getFlashcards(req, res) {
     }
 }
 
-// ─── Review Flashcard ─────────────────────────────────────────────────────────
 async function reviewFlashcard(req, res) {
     try {
         const { id } = req.params;
         const { correct } = req.body;
 
-        // Spaced repetition: next review in 1, 3, 7, or 14 days based on performance
         const [rows] = await db.execute(
             "SELECT times_reviewed, correct_count FROM flashcards WHERE id = ? AND user_id = ?",
             [id, req.user.id]
@@ -202,7 +194,6 @@ async function reviewFlashcard(req, res) {
     }
 }
 
-// ─── Generate Quiz ────────────────────────────────────────────────────────────
 async function generateQuiz(req, res) {
     try {
         const { material_id, subject_id, count = 10, difficulty = "medium", topic } = req.body;
@@ -265,11 +256,9 @@ ${textSnippet}`;
     }
 }
 
-// ─── Submit Quiz Answers ──────────────────────────────────────────────────────
 async function submitQuiz(req, res) {
     try {
         const { session_id, answers } = req.body;
-        // answers: [{ question_id, selected_answer, time_taken_seconds }]
         if (!session_id || !answers) return res.status(400).json({ message: "session_id and answers required" });
 
         let correct = 0;
@@ -299,7 +288,6 @@ async function submitQuiz(req, res) {
 
         const score = Math.round((correct / answers.length) * 100);
 
-        // Log progress
         await db.execute(
             `INSERT INTO progress (user_id, date, quiz_score) VALUES (?, CURDATE(), ?)
              ON DUPLICATE KEY UPDATE quiz_score = ?`,
@@ -312,7 +300,6 @@ async function submitQuiz(req, res) {
     }
 }
 
-// ─── AI Tutor Chat (Spark.E) with RAG ────────────────────────────────────────
 async function chatWithTutor(req, res) {
     try {
         const { message, material_id, session_id } = req.body;
@@ -321,7 +308,6 @@ async function chatWithTutor(req, res) {
         const sid = session_id || `session_${Date.now()}`;
         let context = "";
 
-        // Get material context for RAG
         if (material_id) {
             const [mRows] = await db.execute(
                 "SELECT extracted_text, title FROM materials WHERE id = ? AND user_id = ?",
@@ -332,13 +318,11 @@ async function chatWithTutor(req, res) {
             }
         }
 
-        // Get recent chat history for context
         const [history] = await db.execute(
             "SELECT role, content FROM chat_history WHERE session_id = ? AND user_id = ? ORDER BY created_at ASC LIMIT 10",
             [sid, req.user.id]
         );
 
-        // Save user message
         await db.execute(
             "INSERT INTO chat_history (user_id, material_id, session_id, role, content) VALUES (?, ?, ?, 'user', ?)",
             [req.user.id, material_id || null, sid, message]
@@ -375,7 +359,6 @@ Keep responses concise but thorough. Use bullet points and structure when helpfu
         const aiData = await aiRes.json();
         const reply = aiData.choices[0].message.content;
 
-        // Save AI response
         await db.execute(
             "INSERT INTO chat_history (user_id, material_id, session_id, role, content) VALUES (?, ?, ?, 'assistant', ?)",
             [req.user.id, material_id || null, sid, reply]
@@ -388,12 +371,10 @@ Keep responses concise but thorough. Use bullet points and structure when helpfu
     }
 }
 
-// ─── AI Exam Predictions ──────────────────────────────────────────────────────
 async function predictExam(req, res) {
     try {
         const { subject_id, material_ids } = req.body;
 
-        // Get materials for this subject
         let query = "SELECT extracted_text, title FROM materials WHERE user_id = ? AND status = 'ready'";
         const params = [req.user.id];
         if (subject_id) { query += " AND subject_id = ?"; params.push(subject_id); }
@@ -425,7 +406,6 @@ Return ONLY valid JSON:
         const raw = await callAI(systemPrompt, `Analyze these course materials and predict the most likely exam topics:\n\n${combinedText}`, true);
         const result = JSON.parse(raw);
 
-        // Save prediction
         if (subject_id) {
             await db.execute(
                 "INSERT INTO exam_predictions (user_id, subject_id, predicted_topics, confidence_scores) VALUES (?, ?, ?, ?)",
@@ -440,12 +420,10 @@ Return ONLY valid JSON:
     }
 }
 
-// ─── AI Study Recommendations ─────────────────────────────────────────────────
 async function getRecommendations(req, res) {
     try {
         const userId = req.user.id;
 
-        // Get user's recent performance
         const [progress] = await db.execute(
             "SELECT * FROM progress WHERE user_id = ? ORDER BY created_at DESC LIMIT 14",
             [userId]
@@ -484,7 +462,6 @@ Return ONLY valid JSON:
     }
 }
 
-// ─── Get Progress / Analytics ─────────────────────────────────────────────────
 async function getProgress(req, res) {
     try {
         const userId = req.user.id;
@@ -521,7 +498,6 @@ async function getProgress(req, res) {
     }
 }
 
-// ─── Generate AI Study Calendar ───────────────────────────────────────────────
 async function generateCalendar(req, res) {
     try {
         const userId = req.user.id;
@@ -558,7 +534,6 @@ Tasks to schedule: ${JSON.stringify(tasks.map(t => ({ title: t.title, subject: t
         const raw = await callAI(systemPrompt, prompt, true);
         const { events } = JSON.parse(raw);
 
-        // Save calendar events
         const saved = [];
         for (const ev of events || []) {
             const [result] = await db.execute(
@@ -589,7 +564,6 @@ module.exports = {
     generateCalendar
 };
 
-// ─── AI DAILY TIMETABLE GENERATOR ────────────────────────────────────────────
 async function generateTimetable(req, res) {
     try {
         const userId = req.user.id;
@@ -668,7 +642,6 @@ Return ONLY valid JSON:
 
         const result = JSON.parse(raw);
 
-        // Save to DB
         if (result.timetable) {
             try {
                 await db.execute("DELETE FROM timetable_slots WHERE user_id = ? AND date >= ?", [userId, targetDate]);
@@ -693,7 +666,6 @@ Return ONLY valid JSON:
     }
 }
 
-// ─── GET SAVED TIMETABLE ──────────────────────────────────────────────────────
 async function getTimetable(req, res) {
     try {
         const { date } = req.query;
@@ -718,7 +690,6 @@ async function getTimetable(req, res) {
     }
 }
 
-// ─── SMART DIFFICULTY ASSESSMENT ─────────────────────────────────────────────
 async function assessDifficulty(req, res) {
     try {
         const userId = req.user.id;
@@ -763,7 +734,6 @@ async function assessDifficulty(req, res) {
     }
 }
 
-// ─── WORKLOAD BALANCE CHECK ───────────────────────────────────────────────────
 async function checkWorkload(req, res) {
     try {
         const userId = req.user.id;
@@ -793,7 +763,6 @@ Return ONLY valid JSON:
     }
 }
 
-// ─── SUBMIT FEEDBACK ─────────────────────────────────────────────────────────
 async function submitFeedback(req, res) {
     try {
         const { rating, comment, plan_type } = req.body;
@@ -809,7 +778,6 @@ async function submitFeedback(req, res) {
     }
 }
 
-// ─── AI TASK PRIORITIZATION ───────────────────────────────────────────────────
 async function prioritizeTasks(req, res) {
     try {
         const userId = req.user.id;
@@ -844,7 +812,6 @@ async function prioritizeTasks(req, res) {
     }
 }
 
-// ─── Append new exports ───────────────────────────────────────────────────────
 Object.assign(module.exports, {
     generateTimetable,
     getTimetable,
@@ -853,3 +820,4 @@ Object.assign(module.exports, {
     submitFeedback,
     prioritizeTasks
 });
+
