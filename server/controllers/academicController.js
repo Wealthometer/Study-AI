@@ -1,6 +1,5 @@
 const { db } = require("../config/db");
 
-// ─── TASKS ────────────────────────────────────────────────────────────────────
 async function createTask(req, res) {
     try {
         const { subject_id, title, description, deadline, difficulty, estimated_hours } = req.body;
@@ -57,7 +56,6 @@ async function deleteTask(req, res) {
     }
 }
 
-// ─── SUBJECTS ─────────────────────────────────────────────────────────────────
 async function createSubject(req, res) {
     try {
         const { subject_name, priority_level, color } = req.body;
@@ -107,7 +105,6 @@ async function deleteSubject(req, res) {
     }
 }
 
-// ─── CALENDAR ─────────────────────────────────────────────────────────────────
 async function getCalendarEvents(req, res) {
     try {
         const { start, end } = req.query;
@@ -146,3 +143,4 @@ module.exports = {
     createSubject, getSubjects, updateSubject, deleteSubject,
     getCalendarEvents, createCalendarEvent
 };
+
