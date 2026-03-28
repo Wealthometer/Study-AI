@@ -1,0 +1,12 @@
+const express = require("express");
+const { protect } = require("../middleware/authMiddleware");
+const upload = require("../middleware/uploadMiddleware");
+const { uploadMaterial, addYoutubeLink, getMaterials, getMaterial, deleteMaterial } = require("../controllers/materialController");
+const router = express.Router();
+router.use(protect);
+router.get("/", getMaterials);
+router.get("/:id", getMaterial);
+router.post("/upload", upload.single("file"), uploadMaterial);
+router.post("/youtube", addYoutubeLink);
+router.delete("/:id", deleteMaterial);
+module.exports = router;
