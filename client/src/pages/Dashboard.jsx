@@ -64,7 +64,7 @@ export default function Dashboard() {
       <div style={{ marginBottom: 32 }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
           <div>
-            <p style={{ color: "var(--text2)", fontSize: 13, marginBottom: 4 }}>{greeting} <Hand size={14} />
+            <p style={{ color: "var(--text2)", fontSize: 13, marginBottom: 4 }}>{greeting} <Hand size={14} /></p> 
             <h1 style={{ fontFamily: "var(--ff-display)", fontSize: 28, fontWeight: 800, letterSpacing: "-0.5px" }}>
               {firstName}, <em style={{ fontFamily: "var(--ff-serif)", fontStyle: "italic", color: "var(--gold)" }}>let's study.</em>
             </h1>
@@ -86,7 +86,7 @@ export default function Dashboard() {
         <div style={{ padding: "12px 18px", background: "var(--red-dim)", border: "1px solid rgba(232,74,111,0.2)", borderRadius: 12, marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
           <div>
             <span style={{ color: "var(--red)", fontWeight: 600, fontSize: 13 }}>⚠️ {overdue.length} overdue task{overdue.length > 1 ? "s" : ""} </span>
-            <span style={{ color: "var(--text2)", fontSize: 13 }}>� get back on track!</span>
+            <span style={{ color: "var(--text2)", fontSize: 13 }}>� get back on track!</span>
           </div>
           <button className="btn btn-sm" style={{ background: "var(--red)", color: "#fff" }} onClick={() => navigate("/tasks")}>
             View Tasks <ArrowRight size={12} />
@@ -210,7 +210,7 @@ export default function Dashboard() {
 
           {}
           {difficulty && (() => {
-            const cfg = { beginner: { color: "var(--blue)", emoji: "🌱", label: "Beginner" }, intermediate: { color: "var(--gold)", emoji: "⚡", label: "Intermediate" }, advanced: { color: "var(--green)", emoji: "🔥", label: "Advanced" } }[difficulty.level] || { color: "var(--blue)", emoji: "🌱", label: "Beginner" };
+            const cfg = { beginner: { color: "var(--blue)", icon: Sprout, label: "Beginner" }, intermediate: { color: "var(--gold)", icon: Zap, label: "Intermediate" }, advanced: { color: "var(--green)", icon: Flame, label: "Advanced" } }[difficulty.level] || { color: "var(--blue)", icon: Sprout, label: "Beginner" };
             return (
               <div className="card" style={{ padding: "18px 20px", marginBottom: 14, borderLeft: `3px solid ${cfg.color}`, cursor: "pointer" }} onClick={() => navigate("/timetable")}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -275,5 +275,7 @@ export default function Dashboard() {
     </div>
   );
 }
+
+
 
 
