@@ -7,7 +7,6 @@ import {
 import { Spinner, Toast } from "../components/UI";
 import api from "../lib/api";
 
-// ─── Markdown renderer ────────────────────────────────────────────────────────
 function renderMarkdown(text) {
   return text
     .replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) =>
@@ -24,7 +23,6 @@ function renderMarkdown(text) {
     .replace(/\n/g, '<br/>');
 }
 
-// ─── Suggested prompts by category ───────────────────────────────────────────
 const SUGGESTION_GROUPS = [
   {
     label: "Understand",
@@ -68,7 +66,6 @@ const SUGGESTION_GROUPS = [
   },
 ];
 
-// ─── Single message bubble ────────────────────────────────────────────────────
 function MessageBubble({ msg, onCopy, isLatest }) {
   const isUser = msg.role === "user";
   const [copied, setCopied] = useState(false);
@@ -91,7 +88,7 @@ function MessageBubble({ msg, onCopy, isLatest }) {
         alignItems: "flex-start",
       }}
     >
-      {/* Avatar */}
+      {}
       <div
         style={{
           width: 34,
@@ -115,9 +112,9 @@ function MessageBubble({ msg, onCopy, isLatest }) {
         {isUser ? "U" : <Sparkles size={15} color="#07090f" />}
       </div>
 
-      {/* Content */}
+      {}
       <div style={{ maxWidth: "76%", minWidth: 0 }}>
-        {/* Sender label */}
+        {}
         <div
           style={{
             fontSize: 10,
@@ -132,7 +129,7 @@ function MessageBubble({ msg, onCopy, isLatest }) {
           {isUser ? "You" : "Spark.E"}
         </div>
 
-        {/* Bubble */}
+        {}
         <div
           style={{
             padding: "14px 18px",
@@ -169,7 +166,7 @@ function MessageBubble({ msg, onCopy, isLatest }) {
           )}
         </div>
 
-        {/* Actions */}
+        {}
         {!msg.loading && !isUser && (
           <div
             style={{
@@ -214,7 +211,7 @@ function MessageBubble({ msg, onCopy, isLatest }) {
           </div>
         )}
 
-        {/* Timestamp */}
+        {}
         {msg.time && (
           <div
             style={{
@@ -232,7 +229,6 @@ function MessageBubble({ msg, onCopy, isLatest }) {
   );
 }
 
-// ─── Main Tutor component ─────────────────────────────────────────────────────
 export default function Tutor() {
   const [messages, setMessages] = useState([
     {
@@ -280,7 +276,6 @@ export default function Tutor() {
     });
     setMessages((p) => [...p, { role: "user", content: msg, time }]);
 
-    // Add loading bubble
     setMessages((p) => [
       ...p,
       { role: "assistant", content: "", loading: true },
@@ -353,7 +348,7 @@ export default function Tutor() {
       }}
       className="aFadeUp"
     >
-      {/* ── Top bar ──────────────────────────────────────────────────── */}
+      {}
       <div
         style={{
           display: "flex",
@@ -366,7 +361,7 @@ export default function Tutor() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          {/* Spark.E logo */}
+          {}
           <div
             style={{
               width: 42,
@@ -425,7 +420,7 @@ export default function Tutor() {
         </div>
 
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          {/* Material selector */}
+          {}
           <div style={{ position: "relative" }}>
             <button
               onClick={() => setMatDropdown((o) => !o)}
@@ -596,7 +591,7 @@ export default function Tutor() {
         </div>
       </div>
 
-      {/* Context pill */}
+      {}
       {selectedMatObj && (
         <div
           className="aFadeUp"
@@ -627,7 +622,7 @@ export default function Tutor() {
         </div>
       )}
 
-      {/* ── Messages area ───────────────────────────────────────────── */}
+      {}
       <div
         onClick={() => setMatDropdown(false)}
         style={{
@@ -654,13 +649,13 @@ export default function Tutor() {
         <div ref={bottomRef} />
       </div>
 
-      {/* ── Suggested prompts ──────────────────────────────────────── */}
+      {}
       {showSuggestions && !loading && (
         <div
           style={{ marginBottom: 10, flexShrink: 0 }}
           className="aFadeUp"
         >
-          {/* Group tabs */}
+          {}
           <div
             style={{
               display: "flex",
@@ -701,7 +696,7 @@ export default function Tutor() {
             })}
           </div>
 
-          {/* Prompt chips */}
+          {}
           <div style={{ display: "flex", gap: 7, flexWrap: "wrap" }}>
             {SUGGESTION_GROUPS[activeSuggGroup].prompts.map((p, i) => (
               <button
@@ -736,7 +731,7 @@ export default function Tutor() {
         </div>
       )}
 
-      {/* ── Input area ───────────────────────────────────────────────── */}
+      {}
       <div
         style={{
           flexShrink: 0,
@@ -785,7 +780,7 @@ export default function Tutor() {
           }}
         />
 
-        {/* Input toolbar */}
+        {}
         <div
           style={{
             display: "flex",
@@ -794,7 +789,7 @@ export default function Tutor() {
           }}
         >
           <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-            {/* Suggestion toggle */}
+            {}
             <button
               onClick={() => setShowSuggestions((o) => !o)}
               style={{
@@ -886,7 +881,7 @@ export default function Tutor() {
         </div>
       </div>
 
-      {/* Close dropdown on outside click */}
+      {}
       {matDropdown && (
         <div
           onClick={() => setMatDropdown(false)}
@@ -898,3 +893,4 @@ export default function Tutor() {
     </div>
   );
 }
+
