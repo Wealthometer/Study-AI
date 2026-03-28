@@ -1,12 +1,7 @@
--- ============================================================
--- StudyAI Platform - Database Schema (JWT Auth + Clerk mapping)
--- Run: mysql -u root -p < schema.sql
--- ============================================================
 
 CREATE DATABASE IF NOT EXISTS studyfetch3;
 USE studyfetch3;
 
--- ── Users ─────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS users (
   id               INT AUTO_INCREMENT PRIMARY KEY,
   name             VARCHAR(255)  NOT NULL,
@@ -26,7 +21,6 @@ CREATE TABLE IF NOT EXISTS users (
   created_at       TIMESTAMP     DEFAULT CURRENT_TIMESTAMP
 );
 
--- ── Subjects ──────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS subjects (
   id             INT AUTO_INCREMENT PRIMARY KEY,
   user_id        INT          NOT NULL,
@@ -38,7 +32,6 @@ CREATE TABLE IF NOT EXISTS subjects (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- ── Tasks ─────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS tasks (
   id              INT AUTO_INCREMENT PRIMARY KEY,
   user_id         INT          NOT NULL,
@@ -55,7 +48,6 @@ CREATE TABLE IF NOT EXISTS tasks (
   FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE SET NULL
 );
 
--- ── Study Materials ───────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS materials (
   id             INT AUTO_INCREMENT PRIMARY KEY,
   user_id        INT          NOT NULL,
@@ -72,7 +64,6 @@ CREATE TABLE IF NOT EXISTS materials (
   FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE SET NULL
 );
 
--- ── Flashcards ────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS flashcards (
   id             INT AUTO_INCREMENT PRIMARY KEY,
   user_id        INT       NOT NULL,
@@ -91,7 +82,6 @@ CREATE TABLE IF NOT EXISTS flashcards (
   FOREIGN KEY (subject_id)  REFERENCES subjects(id)  ON DELETE SET NULL
 );
 
--- ── Quiz Questions ────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS quiz_questions (
   id              INT AUTO_INCREMENT PRIMARY KEY,
   user_id         INT          NOT NULL,
@@ -113,7 +103,6 @@ CREATE TABLE IF NOT EXISTS quiz_questions (
   FOREIGN KEY (subject_id)  REFERENCES subjects(id)  ON DELETE SET NULL
 );
 
--- ── Quiz Attempts ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS quiz_attempts (
   id                 INT AUTO_INCREMENT PRIMARY KEY,
   user_id            INT          NOT NULL,
@@ -127,7 +116,6 @@ CREATE TABLE IF NOT EXISTS quiz_attempts (
   FOREIGN KEY (question_id)  REFERENCES quiz_questions(id) ON DELETE CASCADE
 );
 
--- ── Progress Tracking ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS progress (
   id              INT AUTO_INCREMENT PRIMARY KEY,
   user_id         INT          NOT NULL,
@@ -144,7 +132,6 @@ CREATE TABLE IF NOT EXISTS progress (
   FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE SET NULL
 );
 
--- ── Spark.E Chat History ──────────────────────────────────────
 CREATE TABLE IF NOT EXISTS chat_history (
   id          INT AUTO_INCREMENT PRIMARY KEY,
   user_id     INT          NOT NULL,
@@ -157,7 +144,6 @@ CREATE TABLE IF NOT EXISTS chat_history (
   FOREIGN KEY (material_id) REFERENCES materials(id) ON DELETE SET NULL
 );
 
--- ── Study Groups ──────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS study_groups (
   id          INT AUTO_INCREMENT PRIMARY KEY,
   name        VARCHAR(255) NOT NULL,
@@ -171,7 +157,6 @@ CREATE TABLE IF NOT EXISTS study_groups (
   FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- ── Group Members ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS group_members (
   id         INT AUTO_INCREMENT PRIMARY KEY,
   group_id   INT NOT NULL,
@@ -183,7 +168,6 @@ CREATE TABLE IF NOT EXISTS group_members (
   FOREIGN KEY (user_id)  REFERENCES users(id)        ON DELETE CASCADE
 );
 
--- ── Group Discussions ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS group_discussions (
   id         INT AUTO_INCREMENT PRIMARY KEY,
   group_id   INT  NOT NULL,
@@ -195,7 +179,6 @@ CREATE TABLE IF NOT EXISTS group_discussions (
   FOREIGN KEY (user_id)  REFERENCES users(id)        ON DELETE CASCADE
 );
 
--- ── Shared Flashcards ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS group_flashcards (
   id           INT AUTO_INCREMENT PRIMARY KEY,
   group_id     INT NOT NULL,
@@ -207,7 +190,6 @@ CREATE TABLE IF NOT EXISTS group_flashcards (
   FOREIGN KEY (shared_by)    REFERENCES users(id)        ON DELETE CASCADE
 );
 
--- ── Calendar Events ───────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS calendar_events (
   id               INT AUTO_INCREMENT PRIMARY KEY,
   user_id          INT          NOT NULL,
@@ -227,7 +209,6 @@ CREATE TABLE IF NOT EXISTS calendar_events (
   FOREIGN KEY (task_id)    REFERENCES tasks(id)    ON DELETE SET NULL
 );
 
--- ── Exam Predictions ──────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS exam_predictions (
   id                INT AUTO_INCREMENT PRIMARY KEY,
   user_id           INT  NOT NULL,
@@ -239,7 +220,6 @@ CREATE TABLE IF NOT EXISTS exam_predictions (
   FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE SET NULL
 );
 
--- ── AI Timetable Slots ────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS timetable_slots (
   id               INT AUTO_INCREMENT PRIMARY KEY,
   user_id          INT          NOT NULL,
@@ -258,7 +238,6 @@ CREATE TABLE IF NOT EXISTS timetable_slots (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- ── User Feedback ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS feedback (
   id         INT AUTO_INCREMENT PRIMARY KEY,
   user_id    INT          NOT NULL,
@@ -269,7 +248,6 @@ CREATE TABLE IF NOT EXISTS feedback (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- ── Performance Log ───────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS performance_log (
   id           INT AUTO_INCREMENT PRIMARY KEY,
   user_id      INT           NOT NULL,
@@ -279,3 +257,4 @@ CREATE TABLE IF NOT EXISTS performance_log (
   logged_at    TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
