@@ -1,0 +1,12 @@
+const express = require("express");
+const { protect } = require("../middleware/authMiddleware");
+const { createGroup, joinGroup, getMyGroups, getGroupDetails, postDiscussion, shareFlashcard } = require("../controllers/groupController");
+const router = express.Router();
+router.use(protect);
+router.get("/", getMyGroups);
+router.post("/", createGroup);
+router.post("/join", joinGroup);
+router.get("/:id", getGroupDetails);
+router.post("/:id/discuss", postDiscussion);
+router.post("/:id/share-flashcard", shareFlashcard);
+module.exports = router;
