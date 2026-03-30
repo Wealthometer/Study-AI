@@ -3,6 +3,7 @@ import { Clock, Sparkles, ChevronLeft, ChevronRight, RefreshCw,
   TrendingUp, AlertTriangle, ThumbsUp, ThumbsDown, Target, Sprout, Flame, CalendarDays, Lightbulb, PartyPopper } from "lucide-react";
 import { Toast, Spinner, EmptyState } from "../components/UI";
 import api from "../lib/api";
+import { useState, useEffect } from "react";
 
 const DAY_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 const SHORT_DAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
