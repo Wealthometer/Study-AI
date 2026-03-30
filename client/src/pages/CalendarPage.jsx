@@ -149,7 +149,7 @@ export default function CalendarPage() {
       {}
       {modal && (
         <Modal title="Add Calendar Event" onClose={() => setModal(false)}>
-          <div className="field"><label>Title *</label><input className="input" placeholder="e.g. Physics Study Session" value={form.title} onChange={e => setForm(p => ({...p, title: e.target.value}))} /></div>
+          <div className="field"><label>Title *</label><input className="input" placeholder="e.g. MongoDB Study Session" value={form.title} onChange={e => setForm(p => ({...p, title: e.target.value}))} /></div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             <div className="field"><label>Start Time *</label><input type="datetime-local" className="input" value={form.start_time} onChange={e => setForm(p => ({...p, start_time: e.target.value}))} /></div>
             <div className="field"><label>End Time</label><input type="datetime-local" className="input" value={form.end_time} onChange={e => setForm(p => ({...p, end_time: e.target.value}))} /></div>
