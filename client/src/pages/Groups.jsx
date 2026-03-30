@@ -168,7 +168,7 @@ export default function Groups() {
       {}
       {createModal && (
         <Modal title="Create Study Group" onClose={() => setCreateModal(false)}>
-          <div className="field"><label>Group Name *</label><input className="input" placeholder="e.g. Physics Study Crew" value={cForm.name} onChange={e => setCForm(p => ({...p, name: e.target.value}))} /></div>
+          <div className="field"><label>Group Name *</label><input className="input" placeholder="e.g. MongoDB Study Crew" value={cForm.name} onChange={e => setCForm(p => ({...p, name: e.target.value}))} /></div>
           <div className="field"><label>Description</label><textarea className="input" rows={2} placeholder="What will you study together?" value={cForm.description} onChange={e => setCForm(p => ({...p, description: e.target.value}))} style={{ resize: "vertical" }} /></div>
           <div className="field"><label>Subject Focus</label><input className="input" placeholder="e.g. Organic Chemistry" value={cForm.subject} onChange={e => setCForm(p => ({...p, subject: e.target.value}))} /></div>
           <div className="modal-footer">
