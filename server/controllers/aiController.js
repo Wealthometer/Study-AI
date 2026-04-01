@@ -1,22 +1,43 @@
 const { db } = require("../config/db");
 const crypto = require("crypto");
 
+async function getAIConfig() {
+    const provider = process.env.AI_PROVIDER?.toLowerCase()
+      || (process.env.OPENAI_API_KEY ? "openai" : "openrouter");
+
+    const apiKey = provider === "openai"
+      ? process.env.OPENAI_API_KEY
+      : process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
+
+    if (!apiKey) {
+      throw new Error("No AI API key configured. Add OPENAI_API_KEY or OPENROUTER_API_KEY to .env");
+    }
+
+    return {
+      provider,
+      apiKey,
+      model: process.env.AI_MODEL || "gemini-1.5-pro",
+      endpoint: provider === "openai"
+        ? "https://api.openai.com/v1/chat/completions"
+        : "https://openrouter.ai/api/v1/chat/completions"
+    };
+}
+
 async function callAI(systemPrompt, userPrompt, jsonMode = false) {
-    const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
-    if (!apiKey) throw new Error("No AI API key configured. Add OPENROUTER_API_KEY to .env");
+    const { provider, apiKey, model, endpoint } = await getAIConfig();
 
     const body = {
-        model: process.env.AI_MODEL || "openai/gpt-4o-mini",
+        model,
         messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: userPrompt }
         ],
         temperature: 0.7,
         max_tokens: 3000,
-        ...(jsonMode && { response_format: { type: "json_object" } })
+        ...(jsonMode && provider === "openrouter" ? { response_format: { type: "json_object" } } : {})
     };
 
-    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    const res = await fetch(endpoint, {
         method: "POST",
         headers: {
             "Authorization": `Bearer ${apiKey}`,
@@ -29,18 +50,17 @@ async function callAI(systemPrompt, userPrompt, jsonMode = false) {
 
     if (!res.ok) {
         const err = await res.text();
-        throw new Error(`OpenRouter error ${res.status}: ${err}`);
+        throw new Error(`AI request error ${res.status}: ${err}`);
     }
 
     const data = await res.json();
-    return data.choices[0].message.content;
+    return data.choices?.[0]?.message?.content || data.choices?.[0]?.delta?.content || "";
 }
 
 async function callAIStream(messages, onChunk) {
-    const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
-    if (!apiKey) throw new Error("No AI API key configured.");
+    const { provider, apiKey, model, endpoint } = await getAIConfig();
 
-    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    const res = await fetch(endpoint, {
         method: "POST",
         headers: {
             "Authorization": `Bearer ${apiKey}`,
@@ -49,15 +69,16 @@ async function callAIStream(messages, onChunk) {
             "X-Title": "StudyAI Planner"
         },
         body: JSON.stringify({
-            model: process.env.AI_MODEL || "openai/gpt-4o-mini",
+            model,
             messages,
             temperature: 0.7,
             max_tokens: 1200,
-            stream: true
+            stream: true,
+            ...(provider === "openrouter" ? { response_format: { type: "json_object" } } : {})
         })
     });
 
-    if (!res.ok) throw new Error(`OpenRouter stream error ${res.status}`);
+    if (!res.ok) throw new Error(`AI stream error ${res.status}`);
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
@@ -92,6 +113,49 @@ async function getMaterialText(materialId, userId) {
         throw new Error("No text extracted from this material yet.");
     }
     return rows[0];
+}
+
+async function generateStudyPlan(req, res) {
+    try {
+        const { material_id, subject_id, length = 7, focus } = req.body;
+        if (!material_id) return res.status(400).json({ message: "material_id is required" });
+
+        const material = await getMaterialText(material_id, req.user.id);
+        const textSnippet = (material.extracted_text || "").slice(0, 10000);
+
+        const systemPrompt = `You are an expert study planner for university students.
+Create a practical ${length}-day study plan based on the provided course material.
+Return ONLY valid JSON:
+{
+  "study_plan": [
+    {
+      "day": 1,
+      "focus": "...",
+      "topics": ["..."],
+      "activities": ["..."],
+      "estimated_time_hours": 1.5,
+      "tips": "..."
+    }
+  ],
+  "summary": "...",
+  "next_steps": "..."
+}`;
+
+        const userPrompt = `Material title: "${material.title}"
+${focus ? `Focus: ${focus}
+` : ""}
+Please create a ${length}-day study plan from the material below. Use the most important concepts, practical review tasks, and clear next steps.
+
+Material content:
+${textSnippet}`;
+
+        const raw = await callAI(systemPrompt, userPrompt, true);
+        const result = JSON.parse(raw);
+        res.json(result);
+    } catch (error) {
+        console.error("Study plan error:", error);
+        res.status(500).json({ message: error.message });
+    }
 }
 
 async function generateFlashcards(req, res) {
@@ -444,7 +508,9 @@ Return ONLY valid JSON:
     { "type": "focus_area|schedule|technique|resource", "title": "...", "description": "...", "priority": "high|medium|low" }
   ],
   "weekly_goal": "...",
-  "motivational_message": "..."
+  "motivational_message": "...",
+  "next_study": "...",
+  "study_plan_suggestion": "..."
 }`;
 
         const contextData = {
@@ -561,7 +627,8 @@ module.exports = {
     predictExam,
     getRecommendations,
     getProgress,
-    generateCalendar
+    generateCalendar,
+    generateStudyPlan
 };
 
 async function generateTimetable(req, res) {

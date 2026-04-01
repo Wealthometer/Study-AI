@@ -54,15 +54,18 @@ export function AuthProvider({ children }) {
       throw new Error("Auth is still loading. Please try again in a moment.");
     }
 
+    const redirectUrl = `${window.location.origin}/auth/callback`;
+    const redirectUrlComplete = `${window.location.origin}/auth/callback`;
+
     if (isSignedIn) {
-      window.location.href = "/auth/callback";
+      window.location.href = redirectUrl;
       return;
     }
 
     return signIn.authenticateWithRedirect({
       strategy: "oauth_google",
-      redirectUrl: "/auth/callback",
-      redirectUrlComplete: "/auth/callback",
+      redirectUrl,
+      redirectUrlComplete,
     });
   }, [clerkLoaded, signIn, isSignedIn]);
 
