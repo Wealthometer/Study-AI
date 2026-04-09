@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS flashcards (
   answer         TEXT      NOT NULL,
   topic          VARCHAR(255) NULL,
   difficulty     ENUM('easy','medium','hard') DEFAULT 'medium',
+  status         ENUM('active','archived') DEFAULT 'active',
   times_reviewed INT       DEFAULT 0,
   correct_count  INT       DEFAULT 0,
   next_review_at TIMESTAMP NULL,
