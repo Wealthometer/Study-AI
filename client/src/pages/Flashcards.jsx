@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Zap, RefreshCw, ChevronLeft, ChevronRight, Check, X, Sparkles } from "lucide-react";
+import { Zap, RefreshCw, ChevronLeft, ChevronRight, Check, X, Sparkles, Archive, Trash2 } from "lucide-react";
 import { Modal, Toast, EmptyState, Spinner } from "../components/UI";
+import StudySuggestion from "../components/StudySuggestion";
 import api from "../lib/api";
 
 export default function Flashcards() {
@@ -16,6 +17,7 @@ export default function Flashcards() {
   const [generating, setGenerating] = useState(false);
   const [genForm, setGenForm] = useState({ material_id: "", subject_id: "", count: 10, topic: "" });
   const [filter, setFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("active");
 
   useEffect(() => { load(); }, []);
   async function load() {
@@ -44,7 +46,29 @@ export default function Flashcards() {
     else { setStudyMode(false); setStudyIndex(0); setFlipped(false); setToast({ msg: "Study session complete!", type: "success" }); }
   }
 
-  const filtered = flashcards.filter(f => filter === "all" || f.difficulty === filter);
+  async function updateFlashcardStatus(id, status) {
+    try {
+      await api.put(`/ai/flashcards/${id}`, { status });
+      await load();
+      setToast({ msg: status === "archived" ? "Flashcard archived" : "Flashcard restored", type: "success" });
+    } catch (err) {
+      setToast({ msg: err.response?.data?.message || "Unable to update flashcard.", type: "error" });
+    }
+  }
+
+  async function deleteFlashcard(id) {
+    if (!confirm("Remove this flashcard?")) return;
+    try {
+      await api.delete(`/ai/flashcards/${id}`);
+      await load();
+      setToast({ msg: "Flashcard deleted", type: "success" });
+    } catch (err) {
+      setToast({ msg: err.response?.data?.message || "Unable to delete flashcard.", type: "error" });
+    }
+  }
+
+  const filtered = flashcards.filter(f => (statusFilter === "all" || f.status === statusFilter) && (filter === "all" || f.difficulty === filter));
+  const activeCards = flashcards.filter(f => f.status !== "archived" && (filter === "all" || f.difficulty === filter));
   const current = filtered[studyIndex];
 
   if (studyMode && current) {
@@ -106,12 +130,19 @@ export default function Flashcards() {
           <h1 className="section-title" style={{ fontSize: 26 }}>Flashcard <em>Deck</em></h1>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
-          {filtered.length > 0 && <button className="btn btn-secondary btn-sm" onClick={() => { setStudyMode(true); setStudyIndex(0); setFlipped(false); }}><RefreshCw size={13} /> Study Now ({filtered.length})</button>}
+          {(statusFilter !== "archived" && activeCards.length > 0) && <button className="btn btn-secondary btn-sm" onClick={() => { setStudyMode(true); setStudyIndex(0); setFlipped(false); }}><RefreshCw size={13} /> Study Now ({activeCards.length})</button>}
           <button className="btn btn-primary btn-sm" onClick={() => setGenModal(true)}><Sparkles size={13} /> Generate</button>
         </div>
       </div>
 
       {}
+      <div className="tabs" style={{ marginBottom: 14, gap: 6 }}>
+        {[["all", "All"], ["active", "Active"], ["archived", "Archived"]].map(([value, label]) => (
+          <button key={value} className={`chip ${statusFilter === value ? "active" : ""}`} onClick={() => { setStatusFilter(value); setStudyMode(false); setStudyIndex(0); }}>
+            {label} {value === "all" ? `(${flashcards.length})` : `(${flashcards.filter(c => c.status === value).length})`}
+          </button>
+        ))}
+      </div>
       <div className="tabs" style={{ marginBottom: 20, gap: 6 }}>
         {["all","easy","medium","hard"].map(f => (
           <button key={f} className={`chip ${filter === f ? "active" : ""}`} onClick={() => setFilter(f)}>
@@ -119,6 +150,9 @@ export default function Flashcards() {
           </button>
         ))}
       </div>
+
+      {/* Study Suggestion */}
+      {!loading && flashcards.length > 0 && <StudySuggestion />}
 
       {loading ? (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: 14 }}>
@@ -128,21 +162,41 @@ export default function Flashcards() {
         <EmptyState icon={Zap} title="No flashcards yet" desc="Upload a study material and generate AI flashcards in seconds." action={<button className="btn btn-primary btn-sm" onClick={() => setGenModal(true)}>Generate Flashcards</button>} />
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: 14 }}>
-          {filtered.map((card, i) => (
-            <div key={card.id} className="card" style={{ padding: "18px 20px", animationDelay: `${i * 0.04}s` }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
-                <span className={`badge ${card.difficulty === "hard" ? "badge-red" : card.difficulty === "medium" ? "badge-gold" : "badge-green"}`}>{card.difficulty?.toUpperCase()}</span>
-                <span style={{ fontSize: 10, color: "var(--text3)" }}>{card.subject_name || card.topic}</span>
-              </div>
-              <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.5, marginBottom: 12, color: "var(--text)" }}>{card.question}</div>
-              <div style={{ fontSize: 12, color: "var(--text2)", borderTop: "1px solid var(--border)", paddingTop: 10, lineHeight: 1.6 }}>{card.answer}</div>
-              {card.times_reviewed > 0 && (
-                <div style={{ fontSize: 10, color: "var(--text3)", marginTop: 8 }}>
-                  Reviewed {card.times_reviewed}x · {Math.round((card.correct_count / card.times_reviewed) * 100)}% accuracy
+          {filtered.map((card, i) => {
+            const archived = card.status === "archived";
+            return (
+              <div key={card.id} className="card" style={{ padding: "18px 20px", animationDelay: `${i * 0.04}s`, opacity: archived ? 0.64 : 1, border: archived ? "1px dashed var(--border)" : undefined }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10, marginBottom: 10 }}>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                    <span className={`badge ${card.difficulty === "hard" ? "badge-red" : card.difficulty === "medium" ? "badge-gold" : "badge-green"}`}>{card.difficulty?.toUpperCase()}</span>
+                    <span style={{ fontSize: 10, color: "var(--text3)" }}>{card.subject_name || card.topic}</span>
+                    {archived && <span className="badge badge-gray">Archived</span>}
+                  </div>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {archived ? (
+                      <button className="btn btn-secondary btn-sm" onClick={() => updateFlashcardStatus(card.id, "active")}>
+                        <RefreshCw size={14} /> Restore
+                      </button>
+                    ) : (
+                      <button className="btn btn-secondary btn-sm" onClick={() => updateFlashcardStatus(card.id, "archived")}>
+                        <Archive size={14} /> Archive
+                      </button>
+                    )}
+                    <button className="btn btn-danger btn-sm" onClick={() => deleteFlashcard(card.id)}>
+                      <Trash2 size={14} /> Delete
+                    </button>
+                  </div>
                 </div>
-              )}
-            </div>
-          ))}
+                <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.5, marginBottom: 12, color: "var(--text)" }}>{card.question}</div>
+                <div style={{ fontSize: 12, color: "var(--text2)", borderTop: "1px solid var(--border)", paddingTop: 10, lineHeight: 1.6 }}>{card.answer}</div>
+                {card.times_reviewed > 0 && (
+                  <div style={{ fontSize: 10, color: "var(--text3)", marginTop: 8 }}>
+                    Reviewed {card.times_reviewed}x · {Math.round((card.correct_count / card.times_reviewed) * 100)}% accuracy
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 
