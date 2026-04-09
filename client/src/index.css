@@ -22,8 +22,8 @@
   --purple-dim:rgba(155,116,240,0.1);
 
   --text:      #e8ecf4;
-  --text2:     #8892a4;
-  --text3:     rgba(136,146,164,0.55);
+  --text2:     #a8b3c2;
+  --text3:     rgba(153,163,178,0.72);
 
   --radius:    12px;
   --radius-lg: 20px;
@@ -165,17 +165,20 @@ input, select, textarea { font-family: var(--ff-body); }
 
 
 .modal-bg {
-  position: fixed; inset: 0; z-index: 600;
-  background: rgba(0,0,0,0.7); backdrop-filter: blur(12px);
-  display: flex; align-items: center; justify-content: center; padding: 16px;
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.8); backdrop-filter: blur(14px);
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh; padding: 16px;
   animation: fadeIn 0.2s ease;
 }
 .modal {
   background: var(--surface); border: 1px solid var(--border2);
   border-radius: var(--radius-lg); padding: 32px;
-  width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto;
+  width: 100%; max-width: 520px; max-height: calc(100vh - 48px);
+  overflow-y: auto; margin: 0 auto;
   animation: scalePop 0.3s cubic-bezier(.22,1,.36,1);
 }
+
 .modal-title {
   font-family: var(--ff-display); font-size: 20px; font-weight: 700;
   margin-bottom: 24px; color: var(--text);
