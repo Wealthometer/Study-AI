@@ -1,51 +1,89 @@
 const { db } = require("../config/db");
 const crypto = require("crypto");
 
+let flashcardStatusColumnEnsured = false;
+async function ensureFlashcardStatusColumn() {
+    if (flashcardStatusColumnEnsured) return;
+    const [rows] = await db.execute("SHOW COLUMNS FROM flashcards LIKE 'status'");
+    if (rows.length === 0) {
+        await db.execute("ALTER TABLE flashcards ADD COLUMN status ENUM('active','archived') DEFAULT 'active'");
+    }
+    flashcardStatusColumnEnsured = true;
+}
+
 async function getAIConfig() {
-    const provider = process.env.AI_PROVIDER?.toLowerCase()
-      || (process.env.OPENAI_API_KEY ? "openai" : "openrouter");
-
-    const apiKey = provider === "openai"
-      ? process.env.OPENAI_API_KEY
-      : process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
-
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      throw new Error("No AI API key configured. Add OPENAI_API_KEY or OPENROUTER_API_KEY to .env");
+      throw new Error("No AI API key configured. Add GEMINI_API_KEY to .env");
     }
 
     return {
-      provider,
+      provider: "gemini",
       apiKey,
-      model: process.env.AI_MODEL || "gemini-1.5-pro",
-      endpoint: provider === "openai"
-        ? "https://api.openai.com/v1/chat/completions"
-        : "https://openrouter.ai/api/v1/chat/completions"
+      model: process.env.GEMINI_MODEL || "gemini-1.5-pro",
+      endpoint: process.env.GEMINI_API_URL || `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent`
     };
 }
 
 async function callAI(systemPrompt, userPrompt, jsonMode = false) {
-    const { provider, apiKey, model, endpoint } = await getAIConfig();
+    const { apiKey, model } = await getAIConfig();
+    const endpoint = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`;
 
     const body = {
-        model,
-        messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt }
-        ],
-        temperature: 0.7,
-        max_tokens: 3000,
-        ...(jsonMode && provider === "openrouter" ? { response_format: { type: "json_object" } } : {})
+        contents: [{
+            parts: [
+                { text: systemPrompt },
+                { text: userPrompt }
+            ]
+        }],
+        generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 3000,
+            ...(jsonMode && { responseMimeType: "application/json" })
+        }
     };
+
+    try {
+        const res = await fetch(endpoint, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+        });
+
+        if (!res.ok) {
+            const err = await res.text();
+            throw new Error(`AI request error ${res.status}: ${err}`);
+        }
+
+        const data = await res.json();
+        return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    } catch (error) {
+        console.error("Gemini API Error:", error);
+        throw error;
+    }
+}
+
+async function callAIMessages(messages) {
+    const { apiKey, model } = await getAIConfig();
+    const endpoint = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`;
+
+    // Convert from OpenAI format to Gemini format if needed
+    const parts = messages.map(msg => ({ text: msg.content }));
 
     const res = await fetch(endpoint, {
         method: "POST",
         headers: {
-            "Authorization": `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-            "HTTP-Referer": process.env.CLIENT_URL || "http://localhost:5173",
-            "X-Title": "StudyAI Planner"
+            "Content-Type": "application/json"
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify({
+            contents: [{ parts }],
+            generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 1200
+            }
+        })
     });
 
     if (!res.ok) {
@@ -54,27 +92,26 @@ async function callAI(systemPrompt, userPrompt, jsonMode = false) {
     }
 
     const data = await res.json();
-    return data.choices?.[0]?.message?.content || data.choices?.[0]?.delta?.content || "";
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 }
 
 async function callAIStream(messages, onChunk) {
-    const { provider, apiKey, model, endpoint } = await getAIConfig();
+    const { apiKey, model } = await getAIConfig();
+    const endpoint = `https://generativelanguage.googleapis.com/v1/models/${model}:streamGenerateContent?key=${apiKey}`;
+
+    const parts = messages.map(msg => ({ text: msg.content }));
 
     const res = await fetch(endpoint, {
         method: "POST",
         headers: {
-            "Authorization": `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-            "HTTP-Referer": process.env.CLIENT_URL || "http://localhost:5173",
-            "X-Title": "StudyAI Planner"
+            "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            model,
-            messages,
-            temperature: 0.7,
-            max_tokens: 1200,
-            stream: true,
-            ...(provider === "openrouter" ? { response_format: { type: "json_object" } } : {})
+            contents: [{ parts }],
+            generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 1200
+            }
         })
     });
 
@@ -88,16 +125,11 @@ async function callAIStream(messages, onChunk) {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value);
-        const lines = chunk.split("\n").filter(l => l.startsWith("data: "));
-        for (const line of lines) {
-            const json = line.replace("data: ", "").trim();
-            if (json === "[DONE]") continue;
-            try {
-                const parsed = JSON.parse(json);
-                const delta = parsed.choices?.[0]?.delta?.content || "";
-                if (delta) { full += delta; onChunk(delta); }
-            } catch {}
-        }
+        try {
+            const parsed = JSON.parse(chunk);
+            const delta = parsed.candidates?.[0]?.content?.parts?.[0]?.text || "";
+            if (delta) { full += delta; onChunk(delta); }
+        } catch {}
     }
     return full;
 }
@@ -208,10 +240,16 @@ ${textSnippet}`;
 
 async function getFlashcards(req, res) {
     try {
-        const { subject_id, material_id } = req.query;
+        await ensureFlashcardStatusColumn();
+        const { subject_id, material_id, status } = req.query;
         let query = "SELECT f.*, s.subject_name FROM flashcards f LEFT JOIN subjects s ON f.subject_id = s.id WHERE f.user_id = ?";
         const params = [req.user.id];
 
+        if (status === "archived") {
+            query += " AND f.status = 'archived'";
+        } else if (status === "active") {
+            query += " AND (f.status = 'active' OR f.status IS NULL)";
+        }
         if (subject_id) { query += " AND f.subject_id = ?"; params.push(subject_id); }
         if (material_id) { query += " AND f.material_id = ?"; params.push(material_id); }
         query += " ORDER BY f.created_at DESC";
@@ -253,6 +291,32 @@ async function reviewFlashcard(req, res) {
         );
 
         res.json({ message: "Review recorded", next_review_at: nextReview, accuracy: Math.round(accuracy * 100) });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+async function updateFlashcard(req, res) {
+    try {
+        await ensureFlashcardStatusColumn();
+        const { status } = req.body;
+        if (!["active", "archived"].includes(status)) {
+            return res.status(400).json({ message: "Invalid status" });
+        }
+        await db.execute(
+            "UPDATE flashcards SET status = ? WHERE id = ? AND user_id = ?",
+            [status, req.params.id, req.user.id]
+        );
+        res.json({ message: "Flashcard updated" });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+async function deleteFlashcard(req, res) {
+    try {
+        await db.execute("DELETE FROM flashcards WHERE id = ? AND user_id = ?", [req.params.id, req.user.id]);
+        res.json({ message: "Flashcard deleted" });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -403,25 +467,7 @@ Keep responses concise but thorough. Use bullet points and structure when helpfu
             { role: "user", content: message }
         ];
 
-        
-        const apiKey = process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY;
-        const aiRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${apiKey}`,
-                "Content-Type": "application/json",
-                "HTTP-Referer": process.env.CLIENT_URL || "http://localhost:5173",
-                "X-Title": "StudyAI Planner"
-            },
-            body: JSON.stringify({
-                model: process.env.AI_MODEL || "openai/gpt-4o-mini",
-                messages,
-                temperature: 0.7,
-                max_tokens: 1200
-            })
-        });
-        const aiData = await aiRes.json();
-        const reply = aiData.choices[0].message.content;
+        const reply = await callAIMessages(messages);
 
         await db.execute(
             "INSERT INTO chat_history (user_id, material_id, session_id, role, content) VALUES (?, ?, ?, 'assistant', ?)",
@@ -628,7 +674,9 @@ module.exports = {
     getRecommendations,
     getProgress,
     generateCalendar,
-    generateStudyPlan
+    generateStudyPlan,
+    updateFlashcard,
+    deleteFlashcard
 };
 
 async function generateTimetable(req, res) {
@@ -740,18 +788,29 @@ async function getTimetable(req, res) {
         try {
             const [rows] = await db.execute(
                 `SELECT * FROM timetable_slots WHERE user_id = ?
-                 AND date >= ? AND date <= DATE_ADD(?, INTERVAL 7 DAY)
+                 AND date >= ?
                  ORDER BY date ASC, start_time ASC`,
-                [req.user.id, targetDate, targetDate]
+                [req.user.id, targetDate]
             );
+
             const grouped = {};
             for (const row of rows) {
                 const d = row.date instanceof Date ? row.date.toISOString().split("T")[0] : String(row.date).slice(0, 10);
                 if (!grouped[d]) grouped[d] = [];
                 grouped[d].push(row);
             }
-            res.json(grouped);
-        } catch(e) { res.json({}); }
+
+            const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            const timetable = Object.entries(grouped).map(([date, sessions]) => {
+                const dayName = DAY_NAMES[new Date(date).getDay()];
+                const totalStudyMinutes = sessions.reduce((sum, s) => sum + (s.duration_minutes || 0), 0);
+                return { date, day_name: dayName, total_study_minutes: totalStudyMinutes, sessions };
+            });
+
+            res.json({ timetable, weekly_summary: "Saved AI timetable loaded.", ai_tips: [] });
+        } catch(e) {
+            res.json({ timetable: [], weekly_summary: "", ai_tips: [] });
+        }
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -879,12 +938,338 @@ async function prioritizeTasks(req, res) {
     }
 }
 
+async function suggestWhatToStudyNext(req, res) {
+    try {
+        const userId = req.user.id;
+
+        // Fetch all subjects with mastery scores
+        const [subjects] = await db.execute(
+            "SELECT id, subject_name, priority_level, mastery_score, color FROM subjects WHERE user_id = ? ORDER BY mastery_score ASC",
+            [userId]
+        );
+
+        if (subjects.length === 0) {
+            return res.json({
+                suggestion: "Start by creating a subject to organize your studies.",
+                action: "Create a subject",
+                priority: "high",
+                reason: "No subjects found"
+            });
+        }
+
+        // Fetch pending tasks grouped by subject
+        const [tasks] = await db.execute(
+            `SELECT t.id, t.subject_id, t.title, t.difficulty, t.deadline, t.estimated_hours,
+                    s.subject_name, s.mastery_score
+             FROM tasks t
+             LEFT JOIN subjects s ON t.subject_id = s.id
+             WHERE t.user_id = ? AND t.status != 'completed'
+             ORDER BY t.deadline ASC, t.difficulty DESC`,
+            [userId]
+        );
+
+        // Fetch available study materials per subject
+        const [materials] = await db.execute(
+            `SELECT m.id, m.subject_id, m.title, m.file_type, m.status,
+                    s.subject_name, COUNT(f.id) as flashcard_count
+             FROM materials m
+             LEFT JOIN subjects s ON m.subject_id = s.id
+             LEFT JOIN flashcards f ON m.id = f.material_id
+             WHERE m.user_id = ? AND m.status = 'ready'
+             GROUP BY m.id
+             ORDER BY m.subject_id, m.created_at DESC`,
+            [userId]
+        );
+
+        // Fetch flashcard statistics per subject
+        const [flashcardStats] = await db.execute(
+            `SELECT s.id, s.subject_name,
+                    COUNT(f.id) as total_cards,
+                    SUM(CASE WHEN f.status = 'active' OR f.status IS NULL THEN 1 ELSE 0 END) as active_cards,
+                    SUM(CASE WHEN f.times_reviewed = 0 THEN 1 ELSE 0 END) as unreviewed_cards,
+                    ROUND(AVG(CASE WHEN f.times_reviewed > 0 THEN (f.correct_count / f.times_reviewed * 100) ELSE 0 END), 1) as accuracy
+             FROM subjects s
+             LEFT JOIN flashcards f ON s.id = f.subject_id AND f.user_id = ?
+             WHERE s.user_id = ?
+             GROUP BY s.id`,
+            [userId, userId]
+        );
+
+        // Get today's date for deadline proximity calculation
+        const today = new Date();
+        const subjectAnalysis = subjects.map(subject => {
+            const subjectTasks = tasks.filter(t => t.subject_id === subject.id);
+            const subjectMaterials = materials.filter(m => m.subject_id === subject.id);
+            const subjectFlashcards = flashcardStats.find(f => f.id === subject.id);
+            
+            let urgencyScore = 0;
+            let urgencyReason = [];
+
+            // Check task deadlines
+            const urgentTask = subjectTasks.find(t => {
+                if (!t.deadline) return false;
+                const daysUntil = Math.ceil((new Date(t.deadline) - today) / 86400000);
+                return daysUntil >= 0 && daysUntil <= 3;
+            });
+            if (urgentTask) {
+                urgencyScore += 40;
+                urgencyReason.push(`Task "${urgentTask.title}" due in 3 days or less`);
+            }
+
+            // Check if many tasks pending
+            if (subjectTasks.length >= 3) {
+                urgencyScore += 20;
+                urgencyReason.push(`${subjectTasks.length} pending tasks`);
+            }
+
+            // Check low mastery
+            if (subject.mastery_score < 40) {
+                urgencyScore += 30;
+                urgencyReason.push("Low mastery score - needs review");
+            }
+
+            // Check high priority subject
+            if (subject.priority_level === 'high') {
+                urgencyScore += 15;
+                urgencyReason.push("High priority subject");
+            }
+
+            // Check for unreviewed flashcards
+            if (subjectFlashcards && subjectFlashcards.unreviewed_cards > 0) {
+                urgencyScore += 10;
+                urgencyReason.push(`${subjectFlashcards.unreviewed_cards} unreviewed flashcards`);
+            }
+
+            return {
+                id: subject.id,
+                subject_name: subject.subject_name,
+                priority_level: subject.priority_level,
+                mastery_score: subject.mastery_score,
+                color: subject.color,
+                pending_tasks: subjectTasks.length,
+                tasks: subjectTasks.slice(0, 2),
+                available_materials: subjectMaterials.length,
+                materials: subjectMaterials.slice(0, 2),
+                flashcard_stats: subjectFlashcards,
+                urgency_score: urgencyScore,
+                urgency_reasons: urgencyReason
+            };
+        });
+
+        // Sort by urgency score
+        const rankedSubjects = subjectAnalysis.sort((a, b) => b.urgency_score - a.urgency_score);
+        const topSubject = rankedSubjects[0];
+
+        // Create AI prompt for intelligent suggestion
+        const systemPrompt = `You are an AI study advisor. Based on a student's subject analysis, suggest exactly what they should study next. 
+Be concise, actionable, and motivating. Return JSON with exactly this structure:
+{
+  "subject_name": "...",
+  "what_to_do": "Specific action (e.g., 'Review flashcards on Chapter 3', 'Complete overview exercises', 'Read pages 45-67')",
+  "why": "Brief reason (e.g., 'Deadline in 2 days' or 'Foundation concept with 40% mastery')",
+  "estimated_time": "20 minutes|45 minutes|2 hours|etc",
+  "difficulty_level": "easy|medium|hard",
+  "next_after_this": "What to study after completing this (e.g., 'Answer practice quiz')",
+  "motivation": "One encouraging sentence"
+}`;
+
+        const userPrompt = `Top subject analysis: ${JSON.stringify(topSubject, null, 2)}
+
+All subjects: ${JSON.stringify(rankedSubjects, null, 2)}
+
+Suggest what this student should study right now based on their urgency scores, deadlines, available materials, and mastery levels.`;
+
+        const raw = await callAI(systemPrompt, userPrompt, true);
+        const aiSuggestion = JSON.parse(raw);
+
+        res.json({
+            primary_suggestion: aiSuggestion,
+            subject_analysis: topSubject,
+            alternatives: rankedSubjects.slice(1, 3),
+            all_subjects: rankedSubjects
+        });
+    } catch (error) {
+        console.error("Study suggestion error:", error);
+        res.status(500).json({ message: error.message });
+    }
+}
+
+async function generateStudyPlan(req, res) {
+    try {
+        const userId = req.user.id;
+        const { subject_id, material_id, duration_days = 7, intensity = "balanced" } = req.body;
+
+        if (!subject_id && !material_id) {
+            return res.status(400).json({ message: "Provide subject_id or material_id" });
+        }
+
+        // Fetch subject info
+        const [subjects] = await db.execute(
+            "SELECT id, subject_name, priority_level, mastery_score FROM subjects WHERE user_id = ? AND id = ?",
+            [userId, subject_id]
+        );
+        const subject = subjects[0];
+
+        // Fetch material info if provided
+        let material = null;
+        if (material_id) {
+            const [materials] = await db.execute(
+                "SELECT id, title, extracted_text, file_type FROM materials WHERE user_id = ? AND id = ?",
+                [userId, material_id]
+            );
+            material = materials[0];
+        }
+
+        // Get current performance
+        const [perfData] = await db.execute(
+            `SELECT AVG(quiz_score) as avg_score, COUNT(*) as total_quizzes 
+             FROM progress WHERE user_id = ? AND subject_id = ? AND date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)`,
+            [userId, subject_id]
+        );
+
+        const avgScore = parseFloat(perfData[0]?.avg_score) || 60;
+
+        // Get material content snippet for context
+        let materialContext = "";
+        if (material && material.extracted_text) {
+            const lines = material.extracted_text.split("\n").filter(l => l.trim());
+            materialContext = lines.slice(0, 20).join("\n"); // First 20 lines
+        }
+
+        const systemPrompt = `You are an expert study plan creator. Generate a detailed, structured study plan in JSON format.
+Return ONLY valid JSON (no markdown, no explanation):
+{
+  "plan": {
+    "title": "string",
+    "overview": "string",
+    "total_hours": number,
+    "difficulty_progression": "string",
+    "daily_schedule": [
+      {
+        "day": number,
+        "date": "YYYY-MM-DD",
+        "topic": "string",
+        "topics": ["string"],
+        "duration_minutes": number,
+        "materials": ["string"],
+        "tasks": ["string"],
+        "quiz_focus": "string",
+        "difficulty_level": "easy|medium|hard"
+      }
+    ]
+  }
+}`;
+
+        const userPrompt = `Create a ${duration_days}-day study plan for:
+Subject: ${subject?.subject_name || "Study Material"}
+Current Mastery: ${subject?.mastery_score || 50}%
+Average Quiz Score: ${Math.round(avgScore)}%
+Intensity Level: ${intensity}
+${material ? `Material: ${material.title}\nContent Preview:\n${materialContext}` : ""}
+
+${intensity === "intense" ? "Make this challenging with 3-4 hours daily study and advanced topics." : ""}
+${intensity === "light" ? "Make this relaxed with 1-2 hours daily and foundational concepts." : ""}
+${intensity === "balanced" ? "Balance difficulty with progressive learning." : ""}
+
+Create a progressive plan that builds from basics to advanced, with daily milestones and specific study materials/resources.`;
+
+        const raw = await callAI(systemPrompt, userPrompt, true);
+        const planjson = JSON.parse(raw);
+
+        // Add study plan to database if provided material_id
+        if (material_id) {
+            const planJson = JSON.stringify(planjson.plan);
+            await db.execute(
+                `UPDATE materials SET study_plan = ? WHERE id = ? AND user_id = ?`,
+                [planJson, material_id, userId]
+            ).catch(() => {}); // Plan save failure is non-critical
+        }
+
+        res.json(planjson.plan);
+    } catch (error) {
+        console.error("Study plan generation error:", error);
+        res.status(500).json({ message: error.message });
+    }
+}
+
+async function suggestTopicsBasedOnPerformance(req, res) {
+    try {
+        const userId = req.user.id;
+
+        // Get all subjects with performance data
+        const [subjectPerf] = await db.execute(
+            `SELECT s.id, s.subject_name, s.mastery_score, COUNT(t.id) as task_count,
+                    SUM(CASE WHEN t.status='completed' THEN 1 ELSE 0 END) as completed_tasks,
+                    AVG(p.quiz_score) as avg_quiz_score
+             FROM subjects s
+             LEFT JOIN tasks t ON s.id = t.subject_id
+             LEFT JOIN progress p ON s.id = p.subject_id AND p.user_id = ?
+             WHERE s.user_id = ?
+             GROUP BY s.id
+             ORDER BY s.mastery_score ASC`,
+            [userId, userId]
+        );
+
+        if (subjectPerf.length === 0) {
+            return res.json({
+                suggestions: [{
+                    message: "Start by creating subjects to get personalized topic recommendations.",
+                    action: "Create subjects in your dashboard"
+                }]
+            });
+        }
+
+        // Identify weak areas (mastery < 50%)
+        const weakAreas = subjectPerf.filter(s => s.mastery_score < 50);
+        const strongAreas = subjectPerf.filter(s => s.mastery_score >= 70);
+
+        const systemPrompt = `You are an academic advisor. Analyze student performance and suggest specific topics to study.
+Return JSON:
+{
+  "suggestions": [
+    {
+      "subject": "string",
+      "weak_areas": ["string"],
+      "recommended_topics": ["string"],
+      "learning_path": "string",
+      "estimated_hours": number,
+      "resources": "string"
+    }
+  ]
+}`;
+
+        const userPrompt = `Student Performance Analysis:
+
+Weak Areas (mastery < 50%):
+${weakAreas.map(s => `- ${s.subject_name}: ${s.mastery_score}% mastery, ${s.task_count} tasks`).join("\n")}
+
+Strong Areas (mastery >= 70%):
+${strongAreas.map(s => `- ${s.subject_name}: ${s.mastery_score}% mastery`).join("\n")}
+
+Based on performance gaps and weak areas, suggest:
+1. Specific topics to focus on
+2. Learning progression (what to study first)
+3. Estimated study time needed
+4. Resources to use (textbooks, videos, flashcards, etc.)`;
+
+        const raw = await callAI(systemPrompt, userPrompt, true);
+        const suggestions = JSON.parse(raw);
+
+        res.json(suggestions);
+    } catch (error) {
+        console.error("Topic suggestion error:", error);
+        res.status(500).json({ message: error.message });
+    }
+}
+
 Object.assign(module.exports, {
     generateTimetable,
     getTimetable,
     assessDifficulty,
     checkWorkload,
     submitFeedback,
-    prioritizeTasks
+    prioritizeTasks,
+    suggestWhatToStudyNext,
+    generateStudyPlan,
+    suggestTopicsBasedOnPerformance
 });
-
