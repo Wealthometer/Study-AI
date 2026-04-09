@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { BookOpen, CheckSquare, Zap, Brain, ArrowRight, TrendingUp, Calendar, Users, Sparkles, Clock, Target, Hand, AlertTriangle, Sprout, Flame, CheckCircle } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { StatCard, SkeletonCard, EmptyState } from "../components/UI";
+import StudySuggestion from "../components/StudySuggestion";
 import api from "../lib/api";
 
 const SUBJECT_COLORS = ["var(--gold)", "var(--blue)", "var(--green)", "var(--purple)", "var(--red)", "#ff9f40", "#4adce8"];
@@ -93,7 +94,8 @@ export default function Dashboard() {
           </button>
         </div>
       )}
-  
+      {/* AI Study Suggestion */}
+      <StudySuggestion onSubjectSelect={(subject) => navigate(`/subjects/${subject.id}`)} />  
       {}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, marginBottom: 28 }}>
         {loading ? Array(4).fill(0).map((_,i) => <div key={i} className="skeleton" style={{ height: 90, borderRadius: 12 }} />) : <>
