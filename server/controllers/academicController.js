@@ -39,7 +39,16 @@ async function updateTask(req, res) {
              deadline=COALESCE(?,deadline), difficulty=COALESCE(?,difficulty),
              estimated_hours=COALESCE(?,estimated_hours), status=COALESCE(?,status)
              WHERE id=? AND user_id=?`,
-            [title, description, deadline, difficulty, estimated_hours, status, req.params.id, req.user.id]
+            [
+                title ?? null,
+                description ?? null,
+                deadline ?? null,
+                difficulty ?? null,
+                estimated_hours ?? null,
+                status ?? null,
+                req.params.id,
+                req.user.id
+            ]
         );
         res.json({ message: "Task updated" });
     } catch (error) {
