@@ -32,7 +32,16 @@ export function Tasks() {
   }
 
   async function complete(id) {
-    await api.put(`/tasks/${id}`, { status: "completed" }); await load();
+    setSaving(true);
+    try {
+      await api.put(`/tasks/${id}`, { status: "completed" });
+      await load();
+      setToast({ msg: "Task marked complete!", type: "success" });
+    } catch (err) {
+      setToast({ msg: err.response?.data?.message || "Unable to update task.", type: "error" });
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function del(id) {
@@ -68,8 +77,8 @@ export function Tasks() {
          const overdue = days !== null && days < 0 && t.status !== "completed";
          return (
            <div key={t.id} className="card-sm" style={{ padding: "16px 18px", marginBottom: 10, display: "flex", gap: 12, alignItems: "flex-start", opacity: t.status === "completed" ? 0.65 : 1 }}>
-             <button onClick={() => t.status !== "completed" && complete(t.id)} style={{ flexShrink: 0, marginTop: 2 }}>
-               {t.status === "completed" ? <CheckCircle size={18} color="var(--green)" /> : <Circle size={18} color="var(--text3)" />}
+             <button type="button" onClick={() => t.status !== "completed" && complete(t.id)} style={{ flexShrink: 0, marginTop: 2, minWidth: 108, minHeight: 42, display: "inline-flex", alignItems: "center", justifyContent: "center", padding: "0 14px", borderRadius: 14, background: t.status === "completed" ? "rgba(74,232,160,0.12)" : "rgba(74,232,160,0.14)", border: t.status === "completed" ? "1px solid rgba(74,232,160,0.3)" : "1px solid rgba(255,255,255,0.08)", color: t.status === "completed" ? "var(--green)" : "var(--text)", fontWeight: 700, cursor: t.status === "completed" ? "default" : "pointer" }}>
+               {t.status === "completed" ? <><CheckCircle size={14} color="var(--green)" /> Completed</> : <><CheckCircle size={14} color="var(--text)" /> Mark complete</>}
              </button>
              <div style={{ flex: 1, minWidth: 0 }}>
                <div style={{ fontWeight: 600, fontSize: 13, textDecoration: t.status === "completed" ? "line-through" : "none", marginBottom: 5 }}>{t.title}</div>
