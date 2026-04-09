@@ -260,7 +260,7 @@ export default function Dashboard() {
                     <Icon size={14} color={color} />
                   </div>
                   <div>
-                    <div style={{ fontSize: 13, fontWeight: 600 }}>{label}</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text2)" }}>{label}</div>
                     <div style={{ fontSize: 11, color: "var(--text2)" }}>{sub}</div>
                   </div>
                   <ArrowRight size={13} style={{ marginLeft: "auto", color: "var(--text3)" }} />
