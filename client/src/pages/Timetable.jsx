@@ -32,6 +32,7 @@ const LEVEL_CONFIG = {
 };
 
 export default function Timetable() {
+  const STORAGE_KEY = "studyai-timetable-completed";
   const [timetable, setTimetable]     = useState(null);
   const [difficulty, setDifficulty]   = useState(null);
   const [workload, setWorkload]        = useState(null);
@@ -43,12 +44,33 @@ export default function Timetable() {
   const [feedback, setFeedback]        = useState(null);
   const [genForm, setGenForm]          = useState({ days: 7, date: new Date().toISOString().split("T")[0] });
 
-  useEffect(() => { initialLoad(); }, []);
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try { setCompleted(JSON.parse(saved)); } catch {}
+    }
+    initialLoad();
+  }, []);
+
+  async function loadTimetable() {
+    try {
+      const { data } = await api.get("/ai/timetable");
+      if (data?.timetable?.length) {
+        setTimetable(data);
+        setSelectedDay(0);
+      } else {
+        setTimetable(null);
+      }
+    } catch {
+      setTimetable(null);
+    }
+  }
 
   async function initialLoad() {
     setLoading(true);
     try {
-      const [diffRes, wlRes] = await Promise.allSettled([
+      const [timetableResult, diffRes, wlRes] = await Promise.allSettled([
+        loadTimetable(),
         api.get("/ai/difficulty"),
         api.get("/ai/workload"),
       ]);
@@ -64,6 +86,7 @@ export default function Timetable() {
       setTimetable(data);
       setSelectedDay(0);
       setCompleted({});
+      localStorage.removeItem(STORAGE_KEY);
       const d = await api.get("/ai/difficulty");
       setDifficulty(d.data);
       setToast({ msg: `${genForm.days}-day timetable generated at ${data.difficulty_level} level! `, type: "success" });
@@ -80,9 +103,17 @@ export default function Timetable() {
     } catch {}
   }
 
+  function persistCompleted(state) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
   function toggleSession(dayIdx, sessIdx) {
     const key = `${dayIdx}-${sessIdx}`;
-    setCompleted(p => ({ ...p, [key]: !p[key] }));
+    setCompleted(p => {
+      const next = { ...p, [key]: !p[key] };
+      persistCompleted(next);
+      return next;
+    });
   }
 
   const days = timetable?.timetable || [];
@@ -369,6 +400,17 @@ export default function Timetable() {
                                 </span>
                               </div>
                             )}
+
+                            {!isBreak && (
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={e => { e.stopPropagation(); toggleSession(selectedDay, si); }}
+                                style={{ marginTop: 10, width: "100%", justifyContent: "center" }}
+                              >
+                                {done ? "Undo complete" : "Mark complete"}
+                              </button>
+                            )}
+
                             {done && (
                               <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: "var(--green)" }}>
                                 <CheckCircle size={11} /> Completed
